@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Badge } from '@/components/ui/Badge'
 import { Modal } from '@/components/ui/Modal'
+import { Skeleton } from '@/components/ui/Skeleton'
 import { useToast } from '@/components/ui/Toast'
 
 interface Exercise {
@@ -92,8 +93,9 @@ export default function ExerciciosPage() {
       await api.delete(`/trainer/exercises/${id}`)
       showToast('Exercício excluído', 'success')
       loadExercises()
-    } catch(err: any) {
-      showToast(err.response?.data?.error || 'Erro ao excluir', 'error')
+    } catch(err: unknown) {
+      const axiosErr = err as { response?: { data?: { error?: string } } }
+      showToast(axiosErr.response?.data?.error || 'Erro ao excluir', 'error')
     }
   }
 
@@ -128,7 +130,20 @@ export default function ExerciciosPage() {
 
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-gray-400">Carregando...</div>
+          <div className="p-4 space-y-3">
+            {[1,2,3,4,5].map(i => (
+              <div key={i} className="flex items-center gap-4 p-3">
+                <div className="flex-1">
+                  <Skeleton width="50%" height={16} />
+                  <div className="flex gap-1 mt-2">
+                    <Skeleton width={60} height={20} />
+                    <Skeleton width={60} height={20} />
+                  </div>
+                </div>
+                <Skeleton width={24} height={24} />
+              </div>
+            ))}
+          </div>
         ) : exercises.length === 0 ? (
           <div className="p-8 text-center text-gray-400">
             <Dumbbell size={32} className="mx-auto mb-2 opacity-50" />

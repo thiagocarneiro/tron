@@ -22,11 +22,14 @@ interface WorkoutDetail {
     videoUrl: string | null
     orderIndex: number
     hasWarmup: boolean
-    warmupConfig: any
-    feeder1Config: any
-    feeder2Config: any
-    workingSetConfig: any
-    backoffConfig: any
+    warmupConfig: { sets: number; reps: string; note: string } | null
+    feeder1Config: { reps: string; rest: string } | null
+    feeder2Config: { reps: string; rest: string } | null
+    workingSetConfig: {
+      type: string; sets?: number; reps?: string; rest?: string
+      blocks?: number | string; repsPerBlock?: string; intraRest?: string; duration?: string
+    }
+    backoffConfig: { reps: string; rest: string } | null
   }[]
   currentPhase: {
     name: string

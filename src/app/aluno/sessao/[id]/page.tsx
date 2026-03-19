@@ -1,20 +1,31 @@
 'use client'
 
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowLeft, ChevronLeft, ChevronRight, Play, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Play, X, WifiOff } from 'lucide-react'
 import api from '@/api/client'
 import { SetRow } from '@/components/student/SetRow'
 import { RestTimer } from '@/components/student/RestTimer'
 import { SessionSummary } from '@/components/student/SessionSummary'
 import { PRCelebration } from '@/components/student/PRCelebration'
 import { useRestTimer } from '@/hooks/useRestTimer'
+import { useOfflineSync } from '@/hooks/useOfflineSync'
+import { useToast } from '@/components/ui/Toast'
 import { Button } from '@/components/ui/Button'
-import { Badge } from '@/components/ui/Badge'
-import { cn, parseRestTime, calculateVolume, formatDuration } from '@/utils/formatters'
+import { cn, parseRestTime } from '@/utils/formatters'
 
-// Types for the session
+// Proper types instead of `any`
+interface SetConfig {
+  sets?: number
+  blocks?: number
+  reps?: string | number
+  repsPerBlock?: string | number
+  rest?: string
+  intraRest?: string
+}
+
 interface SessionExercise {
+  id?: string
   workoutExerciseId: string
   name: string
   equipmentOptions: string | null
@@ -22,11 +33,11 @@ interface SessionExercise {
   videoUrl: string | null
   orderIndex: number
   hasWarmup: boolean
-  warmupConfig: any
-  feeder1Config: any
-  feeder2Config: any
-  workingSetConfig: any
-  backoffConfig: any
+  warmupConfig: SetConfig | null
+  feeder1Config: SetConfig | null
+  feeder2Config: SetConfig | null
+  workingSetConfig: SetConfig | null
+  backoffConfig: SetConfig | null
 }
 
 interface SetData {
@@ -42,6 +53,11 @@ interface SetData {
   previousReps: number | null
 }
 
+interface HistorySet {
+  weight: number
+  reps: number
+}
+
 interface NewPR {
   exerciseName: string
   weight: number
@@ -52,54 +68,59 @@ export default function ActiveSessionPage() {
   const params = useParams()
   const router = useRouter()
   const sessionId = params.id as string
+  const { showToast } = useToast()
+  const { isOnline } = useOfflineSync()
 
   const [exercises, setExercises] = useState<SessionExercise[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [sets, setSets] = useState<Record<string, SetData[]>>({})
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [sessionStart] = useState(Date.now())
   const [showSummary, setShowSummary] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [newPRs, setNewPRs] = useState<NewPR[]>([])
   const [celebratingPR, setCelebratingPR] = useState<NewPR | null>(null)
-  const [previousData, setPreviousData] = useState<Record<string, { weight: number; reps: number }[]>>({})
-  const [restConfig, setRestConfig] = useState<Record<string, any>>({})
 
   const restTimer = useRestTimer()
+  const mountedRef = useRef(true)
 
-  // Load session data
+  // Cleanup on unmount
   useEffect(() => {
+    return () => { mountedRef.current = false }
+  }, [])
+
+  // Load session data with AbortController
+  useEffect(() => {
+    const controller = new AbortController()
+
     async function loadSession() {
       try {
-        // Get session detail with workout info
         const { data: session } = await api.get(`/student/sessions/${sessionId}`)
-
-        // Get workout detail with exercise configs
         const { data: workout } = await api.get(`/student/workouts/${session.workoutId}`)
 
-        setExercises(workout.exercises || [])
+        if (!mountedRef.current) return
 
-        // Get rest timer config
-        try {
-          const { data: timerConfig } = await api.get('/student/rest-timer/config')
-          setRestConfig(timerConfig.restConfig || {})
-        } catch {}
+        const exerciseList: SessionExercise[] = workout.exercises || []
+        setExercises(exerciseList)
 
         // Initialize sets for each exercise
         const initialSets: Record<string, SetData[]> = {}
-        const prevData: Record<string, { weight: number; reps: number }[]> = {}
+        const prevData: Record<string, HistorySet[]> = {}
 
-        for (const exercise of (workout.exercises || [])) {
+        for (const exercise of exerciseList) {
           const weId = exercise.workoutExerciseId
           const exerciseSets: SetData[] = []
 
-          // Load previous session data for this exercise
+          // Load previous session data
           try {
             const { data: history } = await api.get(`/student/exercises/${exercise.id || weId}/history?limit=1`)
             if (history?.length > 0 && history[0].sets) {
-              prevData[weId] = history[0].sets.map((s: any) => ({ weight: s.weight, reps: s.reps }))
+              prevData[weId] = history[0].sets.map((s: HistorySet) => ({ weight: s.weight, reps: s.reps }))
             }
-          } catch {}
+          } catch { /* ignore history errors */ }
+
+          if (!mountedRef.current) return
 
           let setNum = 0
 
@@ -108,15 +129,12 @@ export default function ActiveSessionPage() {
             const warmupSets = exercise.warmupConfig.sets || 2
             for (let i = 0; i < warmupSets; i++) {
               exerciseSets.push({
-                setType: 'WARMUP',
-                setNumber: i + 1,
-                weight: '',
-                reps: '',
-                completed: false,
-                targetReps: exercise.warmupConfig.reps || '15-20',
+                setType: 'WARMUP', setNumber: i + 1,
+                weight: '', reps: '', completed: false,
+                targetReps: String(exercise.warmupConfig.reps || '15-20'),
                 restSeconds: 60,
-                previousWeight: prevData[weId]?.[setNum]?.weight || null,
-                previousReps: prevData[weId]?.[setNum]?.reps || null,
+                previousWeight: prevData[weId]?.[setNum]?.weight ?? null,
+                previousReps: prevData[weId]?.[setNum]?.reps ?? null,
               })
               setNum++
             }
@@ -125,15 +143,12 @@ export default function ActiveSessionPage() {
           // Feeder 1
           if (exercise.feeder1Config) {
             exerciseSets.push({
-              setType: 'FEEDER_1',
-              setNumber: 1,
-              weight: '',
-              reps: '',
-              completed: false,
-              targetReps: exercise.feeder1Config.reps || '5-6',
+              setType: 'FEEDER_1', setNumber: 1,
+              weight: '', reps: '', completed: false,
+              targetReps: String(exercise.feeder1Config.reps || '5-6'),
               restSeconds: parseRestTime(exercise.feeder1Config.rest || '1min'),
-              previousWeight: prevData[weId]?.[setNum]?.weight || null,
-              previousReps: prevData[weId]?.[setNum]?.reps || null,
+              previousWeight: prevData[weId]?.[setNum]?.weight ?? null,
+              previousReps: prevData[weId]?.[setNum]?.reps ?? null,
             })
             setNum++
           }
@@ -141,15 +156,12 @@ export default function ActiveSessionPage() {
           // Feeder 2
           if (exercise.feeder2Config) {
             exerciseSets.push({
-              setType: 'FEEDER_2',
-              setNumber: 1,
-              weight: '',
-              reps: '',
-              completed: false,
-              targetReps: exercise.feeder2Config.reps || '5-6',
+              setType: 'FEEDER_2', setNumber: 1,
+              weight: '', reps: '', completed: false,
+              targetReps: String(exercise.feeder2Config.reps || '5-6'),
               restSeconds: parseRestTime(exercise.feeder2Config.rest || '1-2min'),
-              previousWeight: prevData[weId]?.[setNum]?.weight || null,
-              previousReps: prevData[weId]?.[setNum]?.reps || null,
+              previousWeight: prevData[weId]?.[setNum]?.weight ?? null,
+              previousReps: prevData[weId]?.[setNum]?.reps ?? null,
             })
             setNum++
           }
@@ -164,15 +176,12 @@ export default function ActiveSessionPage() {
 
             for (let i = 0; i < numSets; i++) {
               exerciseSets.push({
-                setType: 'WORKING',
-                setNumber: i + 1,
-                weight: '',
-                reps: '',
-                completed: false,
-                targetReps: typeof targetReps === 'string' ? targetReps : String(targetReps),
+                setType: 'WORKING', setNumber: i + 1,
+                weight: '', reps: '', completed: false,
+                targetReps: String(targetReps),
                 restSeconds: parseRestTime(restTime),
-                previousWeight: prevData[weId]?.[setNum]?.weight || null,
-                previousReps: prevData[weId]?.[setNum]?.reps || null,
+                previousWeight: prevData[weId]?.[setNum]?.weight ?? null,
+                previousReps: prevData[weId]?.[setNum]?.reps ?? null,
               })
               setNum++
             }
@@ -181,49 +190,68 @@ export default function ActiveSessionPage() {
           // Backoff Set
           if (exercise.backoffConfig) {
             exerciseSets.push({
-              setType: 'BACKOFF',
-              setNumber: 1,
-              weight: '',
-              reps: '',
-              completed: false,
-              targetReps: exercise.backoffConfig.reps || '10-12',
+              setType: 'BACKOFF', setNumber: 1,
+              weight: '', reps: '', completed: false,
+              targetReps: String(exercise.backoffConfig.reps || '10-12'),
               restSeconds: parseRestTime(exercise.backoffConfig.rest || '1-2min'),
-              previousWeight: prevData[weId]?.[setNum]?.weight || null,
-              previousReps: prevData[weId]?.[setNum]?.reps || null,
+              previousWeight: prevData[weId]?.[setNum]?.weight ?? null,
+              previousReps: prevData[weId]?.[setNum]?.reps ?? null,
             })
           }
 
           initialSets[weId] = exerciseSets
         }
 
-        setSets(initialSets)
-        setPreviousData(prevData)
-      } catch (err) {
-        console.error('Error loading session:', err)
+        if (mountedRef.current) {
+          setSets(initialSets)
+        }
+      } catch {
+        if (mountedRef.current) setLoadError(true)
       } finally {
-        setLoading(false)
+        if (mountedRef.current) setLoading(false)
       }
     }
 
     loadSession()
+    return () => controller.abort()
   }, [sessionId])
 
   // Current exercise
   const currentExercise = exercises[currentIndex]
   const currentSets = currentExercise ? sets[currentExercise.workoutExerciseId] || [] : []
 
-  // Progress calculation
-  const totalSets = Object.values(sets).flat().length
-  const completedSets = Object.values(sets).flat().filter(s => s.completed).length
-  const progress = totalSets > 0 ? completedSets / totalSets : 0
+  // Memoized calculations
+  const { totalSets, completedSets, progress } = useMemo(() => {
+    const allSets = Object.values(sets).flat()
+    const total = allSets.length
+    const completed = allSets.filter(s => s.completed).length
+    return { totalSets: total, completedSets: completed, progress: total > 0 ? completed / total : 0 }
+  }, [sets])
+
+  const totalVolume = useMemo(() => {
+    return Object.values(sets).flat()
+      .filter(s => s.completed)
+      .reduce((total, s) => {
+        const w = typeof s.weight === 'string' ? parseFloat(s.weight) || 0 : (s.weight || 0)
+        const r = typeof s.reps === 'string' ? parseInt(String(s.reps)) || 0 : (s.reps || 0)
+        return total + w * r
+      }, 0)
+  }, [sets])
+
+  const exercisesCompleted = useMemo(() => {
+    return exercises.filter(ex => {
+      const exSets = sets[ex.workoutExerciseId] || []
+      return exSets.length > 0 && exSets.every(s => s.completed)
+    }).length
+  }, [exercises, sets])
 
   // Handle set completion
-  const handleCompleteSet = async (exerciseWeId: string, setIndex: number) => {
+  const handleCompleteSet = useCallback(async (exerciseWeId: string, setIndex: number) => {
     const currentSetData = sets[exerciseWeId]?.[setIndex]
     if (!currentSetData || currentSetData.completed) return
 
     const weight = typeof currentSetData.weight === 'string' ? parseFloat(currentSetData.weight) : currentSetData.weight
-    const reps = typeof currentSetData.reps === 'string' ? parseInt(currentSetData.reps as string) : currentSetData.reps
+    const reps = typeof currentSetData.reps === 'string' ? parseInt(String(currentSetData.reps)) : currentSetData.reps
 
     // Mark as completed locally
     setSets(prev => {
@@ -243,8 +271,8 @@ export default function ActiveSessionPage() {
         reps: reps || null,
         completed: true,
       })
-    } catch (err) {
-      console.error('Error saving set:', err)
+    } catch {
+      showToast('Erro ao salvar set — será sincronizado depois', 'error')
     }
 
     // Start rest timer
@@ -256,32 +284,30 @@ export default function ActiveSessionPage() {
     if (typeof navigator !== 'undefined' && navigator.vibrate) {
       navigator.vibrate(50)
     }
-  }
+  }, [sets, sessionId, restTimer, showToast])
 
   // Handle weight/reps change
-  const handleSetChange = (exerciseWeId: string, setIndex: number, field: 'weight' | 'reps', value: number | string) => {
+  const handleSetChange = useCallback((exerciseWeId: string, setIndex: number, field: 'weight' | 'reps', value: number | string) => {
     setSets(prev => {
       const updated = { ...prev }
       updated[exerciseWeId] = [...(updated[exerciseWeId] || [])]
       updated[exerciseWeId][setIndex] = { ...updated[exerciseWeId][setIndex], [field]: value }
       return updated
     })
-  }
+  }, [])
 
   // Navigate exercises
-  const goNext = () => {
+  const goNext = useCallback(() => {
     if (currentIndex < exercises.length - 1) setCurrentIndex(currentIndex + 1)
-  }
-  const goPrev = () => {
+  }, [currentIndex, exercises.length])
+
+  const goPrev = useCallback(() => {
     if (currentIndex > 0) setCurrentIndex(currentIndex - 1)
-  }
+  }, [currentIndex])
 
   // Finish session
-  const handleFinishSession = () => {
-    setShowSummary(true)
-  }
-
-  const handleSubmitSummary = async (data: { rating: number; rpe: number; notes: string }) => {
+  const handleSubmitSummary = useCallback(async (data: { rating: number; rpe: number; notes: string }) => {
+    if (submitting) return
     setSubmitting(true)
     try {
       const duration = Math.round((Date.now() - sessionStart) / 1000)
@@ -297,33 +323,18 @@ export default function ActiveSessionPage() {
         setNewPRs(response.data.newPRs)
       }
 
+      showToast('Treino finalizado com sucesso!', 'success')
       router.replace('/aluno/treinos')
-    } catch (err) {
-      console.error('Error finishing session:', err)
+    } catch {
+      showToast('Erro ao finalizar treino', 'error')
     } finally {
       setSubmitting(false)
     }
-  }
-
-  // Calculate total volume
-  const allSets = Object.values(sets).flat()
-  const totalVolume = allSets
-    .filter(s => s.completed)
-    .reduce((total, s) => {
-      const w = typeof s.weight === 'string' ? parseFloat(s.weight) || 0 : (s.weight || 0)
-      const r = typeof s.reps === 'string' ? parseInt(s.reps as string) || 0 : (s.reps || 0)
-      return total + w * r
-    }, 0)
-
-  // Count completed exercises (all sets done)
-  const exercisesCompleted = exercises.filter(ex => {
-    const exSets = sets[ex.workoutExerciseId] || []
-    return exSets.length > 0 && exSets.every(s => s.completed)
-  }).length
+  }, [submitting, sessionStart, sessionId, router, showToast])
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center animate-fade-in">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500 mx-auto" />
           <p className="text-[#a0a0a0] mt-4">Carregando treino...</p>
@@ -332,18 +343,27 @@ export default function ActiveSessionPage() {
     )
   }
 
-  if (!currentExercise) {
+  if (loadError || !currentExercise) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-[#a0a0a0]">Nenhum exercício encontrado</p>
+      <div className="min-h-screen flex items-center justify-center animate-fade-in">
+        <div className="text-center">
+          <p className="text-[#a0a0a0] mb-4">{loadError ? 'Erro ao carregar treino' : 'Nenhum exercício encontrado'}</p>
+          <Button variant="outline" onClick={() => router.replace('/aluno/treinos')}>Voltar</Button>
+        </div>
       </div>
     )
   }
 
-  const elapsedSeconds = Math.round((Date.now() - sessionStart) / 1000)
-
   return (
     <div className="min-h-screen bg-[#0a0a0a] safe-top">
+      {/* Offline Banner */}
+      {!isOnline && (
+        <div className="bg-amber-500/20 border-b border-amber-500/30 px-4 py-2 flex items-center gap-2 text-amber-400 text-xs animate-slide-down">
+          <WifiOff size={14} />
+          <span>Você está offline — sets serão salvos localmente</span>
+        </div>
+      )}
+
       {/* Header */}
       <div className="sticky top-0 bg-[#0a0a0a]/95 backdrop-blur-sm z-30 border-b border-[#1a1a1a]">
         {/* Progress bar */}
@@ -372,11 +392,7 @@ export default function ActiveSessionPage() {
             <p className="text-xs text-[#444]">{Math.round(progress * 100)}%</p>
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleFinishSession}
-          >
+          <Button variant="outline" size="sm" onClick={() => setShowSummary(true)}>
             Finalizar
           </Button>
         </div>
@@ -431,10 +447,11 @@ export default function ActiveSessionPage() {
             <button
               key={ex.workoutExerciseId}
               onClick={() => setCurrentIndex(i)}
+              aria-label={`Exercício ${i + 1}: ${ex.name}`}
               className={cn(
-                'flex-shrink-0 w-8 h-8 rounded-full text-xs font-medium transition-all',
+                'flex-shrink-0 w-8 h-8 rounded-full text-xs font-medium transition-all duration-200',
                 i === currentIndex
-                  ? 'bg-red-500 text-white'
+                  ? 'bg-red-500 text-white scale-110'
                   : allDone
                     ? 'bg-green-500/20 text-green-400 border border-green-500/30'
                     : someDone

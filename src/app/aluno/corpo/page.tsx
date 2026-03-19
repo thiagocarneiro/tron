@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Plus, Camera, Scale, Ruler, RefreshCw } from 'lucide-react'
+import { Plus, Camera, Scale, Ruler, RefreshCw, Trash2 } from 'lucide-react'
 import api from '@/api/client'
 import { ProgressChart } from '@/components/student/ProgressChart'
 import { Card } from '@/components/ui/Card'
@@ -163,6 +163,17 @@ export default function CorpoPage() {
     reader.readAsDataURL(file)
   }
 
+  const handleDeletePhoto = async (photoId: string) => {
+    if (!confirm('Tem certeza que deseja excluir esta foto?')) return
+    try {
+      await api.delete(`/student/photos/${photoId}`)
+      setPhotos(prev => prev.filter(p => p.id !== photoId))
+      showToast('Foto excluída', 'success')
+    } catch {
+      showToast('Erro ao excluir foto', 'error')
+    }
+  }
+
   const selectedMetricInfo = metricOptions.find(o => o.key === selectedMetric)
 
   if (loading) {
@@ -306,6 +317,13 @@ export default function CorpoPage() {
             {photos.map(photo => (
               <div key={photo.id} className="relative aspect-[3/4] rounded-xl overflow-hidden bg-[#1a1a1a] group">
                 <img src={photo.imageUrl} alt={`Foto ${photo.angle}`} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                <button
+                  onClick={() => handleDeletePhoto(photo.id)}
+                  className="absolute top-2 right-2 w-7 h-7 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/80"
+                  aria-label="Excluir foto"
+                >
+                  <Trash2 size={14} className="text-white" />
+                </button>
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-2">
                   <Badge size="sm">{photo.angle === 'FRONT' ? 'Frente' : photo.angle === 'SIDE' ? 'Lateral' : 'Costas'}</Badge>
                   <p className="text-[10px] text-[#a0a0a0] mt-0.5">{formatDate(photo.date)}</p>

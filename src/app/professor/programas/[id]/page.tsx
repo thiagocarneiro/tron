@@ -6,12 +6,39 @@ import { ArrowLeft, ChevronDown, Play } from 'lucide-react'
 import api from '@/api/client'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
+import { Skeleton } from '@/components/ui/Skeleton'
 import { cn } from '@/utils/formatters'
+
+interface ProgramPhase {
+  id: string; name: string; description: string; color: string; weekStart: number; weekEnd: number; orderIndex: number
+}
+interface WorkoutExercise {
+  id: string; orderIndex: number; name?: string; muscleGroups?: string[]
+  exercise?: { name: string; muscleGroups: string[]; videoUrl: string | null }
+}
+interface ProgramWorkout {
+  id: string; name: string; icon: string; orderIndex: number
+  exercises?: WorkoutExercise[]
+}
+interface RotationSlot {
+  dayOfWeek: number; displayLabel: string; isRest: boolean
+}
+interface ProgramRotation {
+  id: string; label: string; slots: RotationSlot[]
+}
+interface ProgramTip {
+  id: string; icon: string; title: string; text: string
+}
+interface ProgramDetail {
+  name: string; description: string | null; durationWeeks: number
+  phases: ProgramPhase[]; workouts: ProgramWorkout[]
+  rotations?: ProgramRotation[]; tips?: ProgramTip[]
+}
 
 export default function ProgramDetailPage() {
   const params = useParams()
   const router = useRouter()
-  const [program, setProgram] = useState<any>(null)
+  const [program, setProgram] = useState<ProgramDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [expandedWorkout, setExpandedWorkout] = useState<string | null>(null)
 
@@ -24,7 +51,21 @@ export default function ProgramDetailPage() {
     }
   }, [params.id])
 
-  if (loading) return <div className="p-8 text-center text-gray-400">Carregando...</div>
+  if (loading) return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        <Skeleton variant="circular" width={36} height={36} />
+        <div>
+          <Skeleton width={200} height={24} />
+          <Skeleton width={100} height={14} className="mt-1" />
+        </div>
+      </div>
+      <Skeleton variant="rectangular" height={80} />
+      <div className="grid grid-cols-4 gap-3">
+        {[1,2,3,4].map(i => <Skeleton key={i} variant="rectangular" height={90} />)}
+      </div>
+    </div>
+  )
   if (!program) return <div className="p-8 text-center text-gray-400">Programa não encontrado</div>
 
   return (
@@ -47,7 +88,7 @@ export default function ProgramDetailPage() {
       <div>
         <h2 className="text-lg font-semibold text-gray-900 mb-3 font-[family-name:var(--font-heading)]">Fases</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-          {(program.phases || []).sort((a:any,b:any) => a.orderIndex - b.orderIndex).map((phase: any) => (
+          {(program.phases || []).sort((a, b) => a.orderIndex - b.orderIndex).map((phase) => (
             <div key={phase.id} className="bg-white rounded-xl border border-gray-200 p-4" style={{ borderLeftColor: phase.color, borderLeftWidth: 4 }}>
               <p className="font-medium text-gray-900">{phase.name}</p>
               <p className="text-sm text-gray-500">Semanas {phase.weekStart}–{phase.weekEnd}</p>
@@ -61,7 +102,7 @@ export default function ProgramDetailPage() {
       <div>
         <h2 className="text-lg font-semibold text-gray-900 mb-3 font-[family-name:var(--font-heading)]">Treinos</h2>
         <div className="space-y-3">
-          {(program.workouts || []).sort((a:any,b:any) => a.orderIndex - b.orderIndex).map((workout: any) => (
+          {(program.workouts || []).sort((a, b) => a.orderIndex - b.orderIndex).map((workout) => (
             <div key={workout.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
               <button
                 onClick={() => setExpandedWorkout(expandedWorkout === workout.id ? null : workout.id)}
@@ -77,7 +118,7 @@ export default function ProgramDetailPage() {
 
               {expandedWorkout === workout.id && workout.exercises && (
                 <div className="border-t border-gray-200 p-4 space-y-2">
-                  {workout.exercises.sort((a:any,b:any) => a.orderIndex - b.orderIndex).map((ex: any, i: number) => (
+                  {workout.exercises.sort((a, b) => a.orderIndex - b.orderIndex).map((ex, i) => (
                     <div key={ex.id} className="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
                       <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs text-gray-500">{i+1}</span>
                       <div className="flex-1">
@@ -101,15 +142,15 @@ export default function ProgramDetailPage() {
       </div>
 
       {/* Rotations */}
-      {program.rotations?.length > 0 && (
+      {(program.rotations?.length ?? 0) > 0 && (
         <div>
           <h2 className="text-lg font-semibold text-gray-900 mb-3 font-[family-name:var(--font-heading)]">Rotações</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {program.rotations.map((rotation: any) => (
+            {program.rotations!.map((rotation) => (
               <div key={rotation.id} className="bg-white rounded-xl border border-gray-200 p-4">
                 <p className="font-medium text-gray-900 mb-2">{rotation.label}</p>
                 <div className="grid grid-cols-7 gap-1">
-                  {(rotation.slots || []).sort((a:any,b:any) => a.dayOfWeek - b.dayOfWeek).map((slot: any, i: number) => (
+                  {(rotation.slots || []).sort((a, b) => a.dayOfWeek - b.dayOfWeek).map((slot, i) => (
                     <div key={i} className="text-center">
                       <p className="text-[10px] text-gray-400 mb-1">{['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'][slot.dayOfWeek]}</p>
                       <div className={`py-1 rounded text-xs font-medium ${slot.isRest ? 'bg-gray-100 text-gray-400' : 'bg-red-50 text-red-600'}`}>
@@ -125,11 +166,11 @@ export default function ProgramDetailPage() {
       )}
 
       {/* Tips */}
-      {program.tips?.length > 0 && (
+      {(program.tips?.length ?? 0) > 0 && (
         <div>
           <h2 className="text-lg font-semibold text-gray-900 mb-3 font-[family-name:var(--font-heading)]">Dicas</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {program.tips.map((tip: any) => (
+            {program.tips!.map((tip) => (
               <div key={tip.id} className="bg-white rounded-xl border border-gray-200 p-4 flex gap-3">
                 <span className="text-xl">{tip.icon}</span>
                 <div>

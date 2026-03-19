@@ -1,17 +1,14 @@
 'use client'
 
 import { useState, FormEvent } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff, Dumbbell, Loader2, User, GraduationCap } from 'lucide-react'
-import api from '@/api/client'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuth } from '@/hooks/useAuth'
 
 type Role = 'STUDENT' | 'TRAINER'
 
 export default function RegisterPage() {
-  const router = useRouter()
-  const { setAuth } = useAuthStore()
+  const { register, isLoading, error: authError } = useAuth()
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -20,7 +17,6 @@ export default function RegisterPage() {
   const [role, setRole] = useState<Role>('STUDENT')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
   async function handleSubmit(e: FormEvent) {
@@ -42,38 +38,19 @@ export default function RegisterPage() {
       return
     }
 
-    setIsLoading(true)
-
     try {
-      // Register the user
-      await api.post('/auth/register', { name, email, password, role })
-
-      // Auto-login after successful registration
-      const { data } = await api.post('/auth/login', { email, password })
-
-      // Set the auth cookie for middleware
-      document.cookie = `tron-auth-token=${data.accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
-
-      // Set auth in zustand store
-      setAuth(data.user, data.accessToken, data.refreshToken)
-
-      // Redirect based on role
-      if (data.user.role === 'TRAINER') {
-        router.replace('/professor/dashboard')
-      } else {
-        router.replace('/aluno/treinos')
-      }
+      await register({ name, email, password, role })
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { error?: string }; status?: number } }
       if (axiosError.response?.status === 409) {
         setError('Este email já está cadastrado')
+      } else if (authError) {
+        setError(authError)
       } else if (axiosError.response?.data?.error) {
         setError(axiosError.response.data.error)
       } else {
         setError('Erro ao criar conta. Tente novamente.')
       }
-    } finally {
-      setIsLoading(false)
     }
   }
 

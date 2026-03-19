@@ -66,10 +66,15 @@ export default function ProgressoPage() {
     if (selectedExercise) {
       api.get(`/student/exercises/${selectedExercise}/history?limit=20`)
         .then(r => {
-          const historyData = (r.data || []).flatMap((session: any) =>
+          interface HistorySession {
+            date?: string
+            startedAt?: string
+            sets?: { weight?: number; reps?: number }[]
+          }
+          const historyData = (r.data || []).flatMap((session: HistorySession) =>
             (session.sets || [])
-              .filter((s: any) => s.weight)
-              .map((s: any) => ({ date: session.date || session.startedAt, weight: s.weight }))
+              .filter((s) => s.weight)
+              .map((s) => ({ date: session.date || session.startedAt || '', weight: s.weight || 0 }))
           )
           setChartData(historyData)
         })

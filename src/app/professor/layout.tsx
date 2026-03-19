@@ -4,8 +4,7 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { LayoutDashboard, Users, BookOpen, Dumbbell, LogOut, Menu, X } from 'lucide-react'
 import { useState } from 'react'
-import { useAuthStore } from '@/stores/authStore'
-import { useRouter } from 'next/navigation'
+import { useAuth } from '@/hooks/useAuth'
 import { cn } from '@/utils/formatters'
 import { ToastProvider } from '@/components/ui/Toast'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
@@ -20,13 +19,10 @@ const navItems = [
 export default function ProfessorLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const { logout, user } = useAuthStore()
-  const router = useRouter()
+  const { logout, user } = useAuth()
 
   const handleLogout = () => {
     logout()
-    document.cookie = 'tron-auth-token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/'
-    router.push('/login')
   }
 
   return (

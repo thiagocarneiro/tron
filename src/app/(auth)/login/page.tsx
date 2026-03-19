@@ -1,20 +1,16 @@
 'use client'
 
 import { useState, FormEvent } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff, Dumbbell, Loader2 } from 'lucide-react'
-import api from '@/api/client'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function LoginPage() {
-  const router = useRouter()
-  const { setAuth } = useAuthStore()
+  const { login, isLoading, error: authError } = useAuth()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
   async function handleSubmit(e: FormEvent) {
@@ -26,34 +22,19 @@ export default function LoginPage() {
       return
     }
 
-    setIsLoading(true)
-
     try {
-      const { data } = await api.post('/auth/login', { email, password })
-
-      // Set the auth cookie for middleware
-      document.cookie = `tron-auth-token=${data.accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
-
-      // Set auth in zustand store
-      setAuth(data.user, data.accessToken, data.refreshToken)
-
-      // Redirect based on role
-      if (data.user.role === 'TRAINER') {
-        router.replace('/professor/dashboard')
-      } else {
-        router.replace('/aluno/treinos')
-      }
+      await login(email, password)
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { error?: string }; status?: number } }
       if (axiosError.response?.status === 401) {
         setError('Email ou senha incorretos')
+      } else if (authError) {
+        setError(authError)
       } else if (axiosError.response?.data?.error) {
         setError(axiosError.response.data.error)
       } else {
         setError('Erro ao fazer login. Tente novamente.')
       }
-    } finally {
-      setIsLoading(false)
     }
   }
 

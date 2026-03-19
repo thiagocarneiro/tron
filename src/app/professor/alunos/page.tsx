@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Search, ChevronRight } from 'lucide-react'
+import { Search, ChevronRight, Users } from 'lucide-react'
 import api from '@/api/client'
 import { Badge } from '@/components/ui/Badge'
+import { Skeleton } from '@/components/ui/Skeleton'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { formatDate } from '@/utils/formatters'
 
 interface Student {
@@ -69,10 +71,25 @@ export default function AlunosPage() {
       {/* Students list */}
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-gray-400">Carregando...</div>
+          <div className="p-4 space-y-3">
+            {[1,2,3,4,5].map(i => (
+              <div key={i} className="flex items-center gap-4 p-3">
+                <Skeleton variant="circular" width={40} height={40} />
+                <div className="flex-1">
+                  <Skeleton width="40%" height={16} />
+                  <Skeleton width="60%" height={12} className="mt-1" />
+                </div>
+                <Skeleton width={60} height={24} />
+              </div>
+            ))}
+          </div>
         ) : filtered.length === 0 ? (
-          <div className="p-8 text-center text-gray-400">
-            {search ? 'Nenhum aluno encontrado' : 'Nenhum aluno vinculado'}
+          <div className="p-8">
+            <EmptyState
+              icon={Users}
+              title={search ? 'Nenhum aluno encontrado' : 'Nenhum aluno vinculado'}
+              description={search ? 'Tente buscar por outro nome ou email.' : 'Seus alunos aparecerão aqui.'}
+            />
           </div>
         ) : (
           <div className="divide-y divide-gray-100">

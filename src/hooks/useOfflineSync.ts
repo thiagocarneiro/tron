@@ -34,7 +34,7 @@ export function useOfflineSync() {
 
       for (const set of pending) {
         try {
-          await apiClient.post(`/api/student/sessions/${set.sessionId}/sets`, {
+          await apiClient.post(`/student/sessions/${set.sessionId}/sets`, {
             exerciseId: set.exerciseId,
             setType: set.setType,
             weight: set.weight,

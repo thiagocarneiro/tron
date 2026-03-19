@@ -1,8 +1,12 @@
 import { SignJWT, jwtVerify } from 'jose'
 import { hash, compare } from 'bcryptjs'
 
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret')
-const JWT_REFRESH_SECRET = new TextEncoder().encode(process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret')
+const JWT_SECRET = new TextEncoder().encode(
+  process.env.JWT_SECRET || (process.env.NODE_ENV === 'production' ? (() => { throw new Error('JWT_SECRET must be set in production') })() : 'dev-secret-change-me')
+)
+const JWT_REFRESH_SECRET = new TextEncoder().encode(
+  process.env.JWT_REFRESH_SECRET || (process.env.NODE_ENV === 'production' ? (() => { throw new Error('JWT_REFRESH_SECRET must be set in production') })() : 'dev-refresh-secret-change-me')
+)
 
 export interface JWTPayload {
   userId: string

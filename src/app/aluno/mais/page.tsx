@@ -1,13 +1,17 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { LogOut, Moon, Sun, ChevronRight } from 'lucide-react'
+import { LogOut, Lock, UserPen, Eye, EyeOff, Loader2 } from 'lucide-react'
 import api from '@/api/client'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
-import { useAuthStore } from '@/stores/authStore'
-import { getDayName, formatDate, getCurrentWeek, getPhaseForWeek } from '@/utils/formatters'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Modal } from '@/components/ui/Modal'
+import { useToast } from '@/components/ui/Toast'
+import { useAuth } from '@/hooks/useAuth'
+import { useCurrentPhase } from '@/hooks/useCurrentPhase'
+import { getDayName, formatDate } from '@/utils/formatters'
 
 interface ProgramData {
   phases: { id:string; weekStart:number; weekEnd:number; name:string; color:string }[]
@@ -20,8 +24,24 @@ interface ProgramData {
 export default function MaisPage() {
   const [program, setProgram] = useState<ProgramData | null>(null)
   const [loading, setLoading] = useState(true)
-  const { user, logout } = useAuthStore()
-  const router = useRouter()
+  const { user, logout } = useAuth()
+  const { showToast } = useToast()
+  const phaseInfo = useCurrentPhase(program?.startDate || null)
+
+  // Change password state
+  const [showPasswordModal, setShowPasswordModal] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmNewPassword, setConfirmNewPassword] = useState('')
+  const [showCurrentPw, setShowCurrentPw] = useState(false)
+  const [showNewPw, setShowNewPw] = useState(false)
+  const [changingPassword, setChangingPassword] = useState(false)
+
+  // Edit profile state
+  const [showProfileModal, setShowProfileModal] = useState(false)
+  const [profileName, setProfileName] = useState('')
+  const [profilePhone, setProfilePhone] = useState('')
+  const [savingProfile, setSavingProfile] = useState(false)
 
   useEffect(() => {
     api.get('/student/program')
@@ -32,12 +52,66 @@ export default function MaisPage() {
 
   const handleLogout = () => {
     logout()
-    document.cookie = 'tron-auth-token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/'
-    router.push('/login')
   }
 
-  const currentWeek = program?.startDate ? getCurrentWeek(new Date(program.startDate)) : 1
-  const currentPhaseIdx = getPhaseForWeek(currentWeek) - 1
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword) {
+      showToast('Preencha todos os campos', 'error')
+      return
+    }
+    if (newPassword.length < 6) {
+      showToast('Nova senha deve ter pelo menos 6 caracteres', 'error')
+      return
+    }
+    if (newPassword !== confirmNewPassword) {
+      showToast('Senhas não coincidem', 'error')
+      return
+    }
+    setChangingPassword(true)
+    try {
+      await api.put('/auth/change-password', { currentPassword, newPassword })
+      showToast('Senha alterada com sucesso!', 'success')
+      setShowPasswordModal(false)
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmNewPassword('')
+    } catch {
+      showToast('Erro ao alterar senha. Verifique a senha atual.', 'error')
+    } finally {
+      setChangingPassword(false)
+    }
+  }
+
+  const handleEditProfile = async () => {
+    if (!profileName.trim()) {
+      showToast('Nome é obrigatório', 'error')
+      return
+    }
+    setSavingProfile(true)
+    try {
+      await api.put('/student/profile', { name: profileName.trim(), phone: profilePhone.trim() || null })
+      showToast('Perfil atualizado!', 'success')
+      setShowProfileModal(false)
+    } catch {
+      showToast('Erro ao atualizar perfil', 'error')
+    } finally {
+      setSavingProfile(false)
+    }
+  }
+
+  const openProfileModal = () => {
+    setProfileName(user?.name || '')
+    setProfilePhone('')
+    // Load current profile data
+    api.get('/student/profile').then(r => {
+      setProfileName(r.data.name || user?.name || '')
+      setProfilePhone(r.data.phone || '')
+    }).catch(() => {})
+    setShowProfileModal(true)
+  }
+
+  const currentWeek = phaseInfo?.currentWeek || 1
+  const currentPhaseIdx = phaseInfo ? phaseInfo.currentPhase - 1 : 0
 
   return (
     <div className="p-4 space-y-6 safe-top pb-24">
@@ -153,6 +227,25 @@ export default function MaisPage() {
         </Card>
       </div>
 
+      {/* Account Actions */}
+      <div className="space-y-2">
+        <h2 className="text-sm font-medium text-[#a0a0a0] mb-3">Conta</h2>
+        <button
+          onClick={openProfileModal}
+          className="w-full flex items-center gap-3 p-3 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl hover:bg-[#1f1f1f] transition-colors"
+        >
+          <UserPen size={18} className="text-[#a0a0a0]" />
+          <span className="text-sm font-medium">Editar Perfil</span>
+        </button>
+        <button
+          onClick={() => setShowPasswordModal(true)}
+          className="w-full flex items-center gap-3 p-3 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl hover:bg-[#1f1f1f] transition-colors"
+        >
+          <Lock size={18} className="text-[#a0a0a0]" />
+          <span className="text-sm font-medium">Alterar Senha</span>
+        </button>
+      </div>
+
       {/* Logout */}
       <button
         onClick={handleLogout}
@@ -161,6 +254,76 @@ export default function MaisPage() {
         <LogOut size={18} />
         <span className="text-sm font-medium">Sair da Conta</span>
       </button>
+
+      {/* Change Password Modal */}
+      <Modal isOpen={showPasswordModal} onClose={() => setShowPasswordModal(false)} title="Alterar Senha" size="sm">
+        <div className="space-y-4">
+          <div className="relative">
+            <Input
+              label="Senha atual"
+              type={showCurrentPw ? 'text' : 'password'}
+              value={currentPassword}
+              onChange={e => setCurrentPassword(e.target.value)}
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              onClick={() => setShowCurrentPw(!showCurrentPw)}
+              className="absolute right-3 top-8 text-[#555] hover:text-[#a0a0a0]"
+            >
+              {showCurrentPw ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+          <div className="relative">
+            <Input
+              label="Nova senha"
+              type={showNewPw ? 'text' : 'password'}
+              value={newPassword}
+              onChange={e => setNewPassword(e.target.value)}
+              placeholder="Mínimo 6 caracteres"
+            />
+            <button
+              type="button"
+              onClick={() => setShowNewPw(!showNewPw)}
+              className="absolute right-3 top-8 text-[#555] hover:text-[#a0a0a0]"
+            >
+              {showNewPw ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+          <Input
+            label="Confirmar nova senha"
+            type="password"
+            value={confirmNewPassword}
+            onChange={e => setConfirmNewPassword(e.target.value)}
+            placeholder="Repita a nova senha"
+          />
+          <Button fullWidth loading={changingPassword} onClick={handleChangePassword}>
+            Alterar Senha
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Edit Profile Modal */}
+      <Modal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} title="Editar Perfil" size="sm">
+        <div className="space-y-4">
+          <Input
+            label="Nome"
+            value={profileName}
+            onChange={e => setProfileName(e.target.value)}
+            placeholder="Seu nome completo"
+          />
+          <Input
+            label="Telefone"
+            type="tel"
+            value={profilePhone}
+            onChange={e => setProfilePhone(e.target.value)}
+            placeholder="(00) 00000-0000"
+          />
+          <Button fullWidth loading={savingProfile} onClick={handleEditProfile}>
+            Salvar
+          </Button>
+        </div>
+      </Modal>
     </div>
   )
 }

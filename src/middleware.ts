@@ -3,7 +3,9 @@ import type { NextRequest } from 'next/server'
 import { jwtVerify } from 'jose'
 
 const publicPaths = ['/login', '/register', '/api/auth/login', '/api/auth/register', '/api/auth/refresh']
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret')
+const JWT_SECRET = new TextEncoder().encode(
+  process.env.JWT_SECRET || (process.env.NODE_ENV === 'production' ? 'MISSING_JWT_SECRET' : 'dev-secret-change-me')
+)
 
 async function verifyToken(token: string): Promise<{ id: string; email: string; role: string } | null> {
   try {
