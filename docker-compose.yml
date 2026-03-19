@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: tron_fitness
+      POSTGRES_USER: tron
+      POSTGRES_PASSWORD: tron_secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

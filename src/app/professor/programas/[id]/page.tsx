@@ -1,0 +1,146 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import { ArrowLeft, ChevronDown, Play } from 'lucide-react'
+import api from '@/api/client'
+import { Card } from '@/components/ui/Card'
+import { Badge } from '@/components/ui/Badge'
+import { cn } from '@/utils/formatters'
+
+export default function ProgramDetailPage() {
+  const params = useParams()
+  const router = useRouter()
+  const [program, setProgram] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [expandedWorkout, setExpandedWorkout] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (params.id) {
+      api.get(`/trainer/programs/${params.id}`)
+        .then(r => setProgram(r.data))
+        .catch(console.error)
+        .finally(() => setLoading(false))
+    }
+  }, [params.id])
+
+  if (loading) return <div className="p-8 text-center text-gray-400">Carregando...</div>
+  if (!program) return <div className="p-8 text-center text-gray-400">Programa não encontrado</div>
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        <button onClick={() => router.back()} className="p-2 hover:bg-gray-100 rounded-xl">
+          <ArrowLeft size={20} className="text-gray-600" />
+        </button>
+        <div>
+          <h1 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-heading)]">{program.name}</h1>
+          <p className="text-sm text-gray-500">{program.durationWeeks} semanas</p>
+        </div>
+      </div>
+
+      {program.description && (
+        <p className="text-gray-600">{program.description}</p>
+      )}
+
+      {/* Phases */}
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900 mb-3 font-[family-name:var(--font-heading)]">Fases</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          {(program.phases || []).sort((a:any,b:any) => a.orderIndex - b.orderIndex).map((phase: any) => (
+            <div key={phase.id} className="bg-white rounded-xl border border-gray-200 p-4" style={{ borderLeftColor: phase.color, borderLeftWidth: 4 }}>
+              <p className="font-medium text-gray-900">{phase.name}</p>
+              <p className="text-sm text-gray-500">Semanas {phase.weekStart}–{phase.weekEnd}</p>
+              <p className="text-xs text-gray-400 mt-2">{phase.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Workouts */}
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900 mb-3 font-[family-name:var(--font-heading)]">Treinos</h2>
+        <div className="space-y-3">
+          {(program.workouts || []).sort((a:any,b:any) => a.orderIndex - b.orderIndex).map((workout: any) => (
+            <div key={workout.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <button
+                onClick={() => setExpandedWorkout(expandedWorkout === workout.id ? null : workout.id)}
+                className="w-full flex items-center gap-3 p-4 text-left hover:bg-gray-50"
+              >
+                <span className="text-2xl">{workout.icon}</span>
+                <div className="flex-1">
+                  <p className="font-medium text-gray-900">{workout.name}</p>
+                  <p className="text-sm text-gray-500">{workout.exercises?.length || 0} exercícios</p>
+                </div>
+                <ChevronDown size={18} className={cn('text-gray-400 transition-transform', expandedWorkout === workout.id && 'rotate-180')} />
+              </button>
+
+              {expandedWorkout === workout.id && workout.exercises && (
+                <div className="border-t border-gray-200 p-4 space-y-2">
+                  {workout.exercises.sort((a:any,b:any) => a.orderIndex - b.orderIndex).map((ex: any, i: number) => (
+                    <div key={ex.id} className="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
+                      <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs text-gray-500">{i+1}</span>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">{ex.exercise?.name || ex.name}</p>
+                        <p className="text-xs text-gray-400">
+                          {ex.exercise?.muscleGroups?.join(', ') || ex.muscleGroups?.join(', ')}
+                        </p>
+                      </div>
+                      {ex.exercise?.videoUrl && (
+                        <a href={ex.exercise.videoUrl} target="_blank" rel="noopener noreferrer" className="text-red-500 hover:text-red-600">
+                          <Play size={14} />
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Rotations */}
+      {program.rotations?.length > 0 && (
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-3 font-[family-name:var(--font-heading)]">Rotações</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {program.rotations.map((rotation: any) => (
+              <div key={rotation.id} className="bg-white rounded-xl border border-gray-200 p-4">
+                <p className="font-medium text-gray-900 mb-2">{rotation.label}</p>
+                <div className="grid grid-cols-7 gap-1">
+                  {(rotation.slots || []).sort((a:any,b:any) => a.dayOfWeek - b.dayOfWeek).map((slot: any, i: number) => (
+                    <div key={i} className="text-center">
+                      <p className="text-[10px] text-gray-400 mb-1">{['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'][slot.dayOfWeek]}</p>
+                      <div className={`py-1 rounded text-xs font-medium ${slot.isRest ? 'bg-gray-100 text-gray-400' : 'bg-red-50 text-red-600'}`}>
+                        {slot.displayLabel}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Tips */}
+      {program.tips?.length > 0 && (
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-3 font-[family-name:var(--font-heading)]">Dicas</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {program.tips.map((tip: any) => (
+              <div key={tip.id} className="bg-white rounded-xl border border-gray-200 p-4 flex gap-3">
+                <span className="text-xl">{tip.icon}</span>
+                <div>
+                  <p className="font-medium text-gray-900 text-sm">{tip.title}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{tip.text}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

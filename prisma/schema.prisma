@@ -1,0 +1,319 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+// ──────────────── Autenticação & Usuários ────────────────
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String
+  role          Role     @default(STUDENT)
+  name          String
+  avatarUrl     String?
+  phone         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  studentProfile  StudentProfile?
+  trainerProfile  TrainerProfile?
+  refreshTokens   RefreshToken[]
+}
+
+enum Role {
+  STUDENT
+  TRAINER
+  ADMIN
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+// ──────────────── Perfis ────────────────
+
+model TrainerProfile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cref   String?
+
+  students         StudentProfile[]
+  createdPrograms  TrainingProgram[]
+}
+
+model StudentProfile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trainerId   String?
+  trainer     TrainerProfile? @relation(fields: [trainerId], references: [id])
+  birthDate   DateTime?
+  gender      Gender?
+  height      Float?
+  startDate   DateTime @default(now())
+
+  assignedPrograms  ProgramAssignment[]
+  workoutSessions   WorkoutSession[]
+  bodyMeasurements  BodyMeasurement[]
+  progressPhotos    ProgressPhoto[]
+  personalRecords   PersonalRecord[]
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+// ──────────────── Programa de Treino ────────────────
+
+model TrainingProgram {
+  id            String   @id @default(uuid())
+  name          String
+  description   String?
+  durationWeeks Int
+  createdById   String
+  createdBy     TrainerProfile @relation(fields: [createdById], references: [id])
+  isTemplate    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  phases       TrainingPhase[]
+  assignments  ProgramAssignment[]
+  rotations    WeeklyRotation[]
+  tips         ProgramTip[]
+  workouts     Workout[]
+}
+
+model TrainingPhase {
+  id          String @id @default(uuid())
+  programId   String
+  program     TrainingProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  weekStart   Int
+  weekEnd     Int
+  name        String
+  description String
+  color       String
+  orderIndex  Int
+
+  phaseExerciseConfigs  PhaseExerciseConfig[]
+}
+
+model ProgramTip {
+  id         String @id @default(uuid())
+  programId  String
+  program    TrainingProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  title      String
+  icon       String
+  text       String
+  orderIndex Int
+}
+
+// ──────────────── Treinos (Workouts) ────────────────
+
+model Workout {
+  id          String @id @default(uuid())
+  programId   String
+  program     TrainingProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  name        String
+  icon        String
+  orderIndex  Int
+
+  exercises       WorkoutExercise[]
+  rotationSlots   RotationSlot[]
+  sessions        WorkoutSession[]
+}
+
+model WeeklyRotation {
+  id          String @id @default(uuid())
+  programId   String
+  program     TrainingProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  label       String
+  orderIndex  Int
+
+  slots  RotationSlot[]
+}
+
+model RotationSlot {
+  id           String @id @default(uuid())
+  rotationId   String
+  rotation     WeeklyRotation @relation(fields: [rotationId], references: [id], onDelete: Cascade)
+  dayOfWeek    Int
+  workoutId    String?
+  workout      Workout? @relation(fields: [workoutId], references: [id])
+  isRest       Boolean @default(false)
+  displayLabel String
+}
+
+// ──────────────── Exercícios ────────────────
+
+model Exercise {
+  id              String  @id @default(uuid())
+  name            String
+  equipmentOptions String?
+  muscleGroups    String[]
+  videoUrl        String?
+  instructions    String?
+  imageUrl        String?
+
+  workoutExercises  WorkoutExercise[]
+  personalRecords   PersonalRecord[]
+}
+
+model WorkoutExercise {
+  id          String @id @default(uuid())
+  workoutId   String
+  workout     Workout @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  exerciseId  String
+  exercise    Exercise @relation(fields: [exerciseId], references: [id])
+  orderIndex  Int
+
+  hasWarmup       Boolean @default(false)
+  warmupConfig    String?
+  feeder1Config   String?
+  feeder2Config   String?
+
+  phaseConfigs    PhaseExerciseConfig[]
+  sessionSets     SessionSet[]
+}
+
+model PhaseExerciseConfig {
+  id                String @id @default(uuid())
+  phaseId           String
+  phase             TrainingPhase @relation(fields: [phaseId], references: [id], onDelete: Cascade)
+  workoutExerciseId String
+  workoutExercise   WorkoutExercise @relation(fields: [workoutExerciseId], references: [id], onDelete: Cascade)
+
+  workingSetConfig  String
+  backoffConfig     String?
+
+  @@unique([phaseId, workoutExerciseId])
+}
+
+// ──────────────── Sessões de Treino (Tracking) ────────────────
+
+model WorkoutSession {
+  id          String   @id @default(uuid())
+  studentId   String
+  student     StudentProfile @relation(fields: [studentId], references: [id])
+  workoutId   String
+  workout     Workout  @relation(fields: [workoutId], references: [id])
+  phaseWeek   Int
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  duration    Int?
+  rating      Int?
+  rpe         Float?
+  notes       String?
+  trainerNote String?
+
+  sets  SessionSet[]
+}
+
+model SessionSet {
+  id                  String @id @default(uuid())
+  sessionId           String
+  session             WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  workoutExerciseId   String
+  workoutExercise     WorkoutExercise @relation(fields: [workoutExerciseId], references: [id])
+
+  setType     SetType
+  setNumber   Int
+
+  weight      Float?
+  reps        Int?
+  rpe         Float?
+  completed   Boolean  @default(false)
+  notes       String?
+
+  createdAt   DateTime @default(now())
+}
+
+enum SetType {
+  WARMUP
+  FEEDER_1
+  FEEDER_2
+  WORKING
+  BACKOFF
+}
+
+// ──────────────── Atribuição de Programa ────────────────
+
+model ProgramAssignment {
+  id          String   @id @default(uuid())
+  studentId   String
+  student     StudentProfile @relation(fields: [studentId], references: [id])
+  programId   String
+  program     TrainingProgram @relation(fields: [programId], references: [id])
+  startDate   DateTime
+  isActive    Boolean  @default(true)
+
+  customNotes String?
+
+  @@unique([studentId, programId])
+}
+
+// ──────────────── Métricas Corporais ────────────────
+
+model BodyMeasurement {
+  id          String   @id @default(uuid())
+  studentId   String
+  student     StudentProfile @relation(fields: [studentId], references: [id])
+  date        DateTime @default(now())
+
+  weight      Float?
+  bodyFat     Float?
+  chest       Float?
+  waist       Float?
+  hips        Float?
+  leftArm     Float?
+  rightArm    Float?
+  leftThigh   Float?
+  rightThigh  Float?
+  leftCalf    Float?
+  rightCalf   Float?
+  neck        Float?
+  shoulders   Float?
+}
+
+model ProgressPhoto {
+  id          String   @id @default(uuid())
+  studentId   String
+  student     StudentProfile @relation(fields: [studentId], references: [id])
+  imageUrl    String
+  angle       PhotoAngle
+  date        DateTime @default(now())
+  notes       String?
+}
+
+enum PhotoAngle {
+  FRONT
+  SIDE
+  BACK
+}
+
+// ──────────────── Recordes Pessoais ────────────────
+
+model PersonalRecord {
+  id          String   @id @default(uuid())
+  studentId   String
+  student     StudentProfile @relation(fields: [studentId], references: [id])
+  exerciseId  String
+  exercise    Exercise @relation(fields: [exerciseId], references: [id])
+  weight      Float
+  reps        Int
+  date        DateTime @default(now())
+
+  @@unique([studentId, exerciseId])
+}
