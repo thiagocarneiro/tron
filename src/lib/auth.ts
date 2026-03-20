@@ -1,12 +1,17 @@
 import { SignJWT, jwtVerify } from 'jose'
 import { hash, compare } from 'bcryptjs'
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || (process.env.NODE_ENV === 'production' ? (() => { throw new Error('JWT_SECRET must be set in production') })() : 'dev-secret-change-me')
-)
-const JWT_REFRESH_SECRET = new TextEncoder().encode(
-  process.env.JWT_REFRESH_SECRET || (process.env.NODE_ENV === 'production' ? (() => { throw new Error('JWT_REFRESH_SECRET must be set in production') })() : 'dev-refresh-secret-change-me')
-)
+function getJwtSecret() {
+  const secret = process.env.JWT_SECRET || (process.env.NODE_ENV === 'production' ? undefined : 'dev-secret-change-me')
+  if (!secret) throw new Error('JWT_SECRET must be set in production')
+  return new TextEncoder().encode(secret)
+}
+
+function getJwtRefreshSecret() {
+  const secret = process.env.JWT_REFRESH_SECRET || (process.env.NODE_ENV === 'production' ? undefined : 'dev-refresh-secret-change-me')
+  if (!secret) throw new Error('JWT_REFRESH_SECRET must be set in production')
+  return new TextEncoder().encode(secret)
+}
 
 export interface JWTPayload {
   userId: string
@@ -27,7 +32,7 @@ export async function signAccessToken(payload: JWTPayload): Promise<string> {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('15m')
-    .sign(JWT_SECRET)
+    .sign(getJwtSecret())
 }
 
 export async function signRefreshToken(payload: JWTPayload): Promise<string> {
@@ -35,15 +40,15 @@ export async function signRefreshToken(payload: JWTPayload): Promise<string> {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('7d')
-    .sign(JWT_REFRESH_SECRET)
+    .sign(getJwtRefreshSecret())
 }
 
 export async function verifyAccessToken(token: string): Promise<JWTPayload> {
-  const { payload } = await jwtVerify(token, JWT_SECRET)
+  const { payload } = await jwtVerify(token, getJwtSecret())
   return payload as unknown as JWTPayload
 }
 
 export async function verifyRefreshToken(token: string): Promise<JWTPayload> {
-  const { payload } = await jwtVerify(token, JWT_REFRESH_SECRET)
+  const { payload } = await jwtVerify(token, getJwtRefreshSecret())
   return payload as unknown as JWTPayload
 }
