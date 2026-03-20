@@ -37,7 +37,7 @@ export async function GET(
     select: { id: true },
   })
 
-  const workoutExerciseIds = workoutExercises.map((we) => we.id)
+  const workoutExerciseIds = workoutExercises.map((we: { id: string }) => we.id)
 
   if (workoutExerciseIds.length === 0) {
     return jsonResponse({ exercise, sessions: [] })
