@@ -23,7 +23,6 @@ export function Modal({ isOpen, onClose, title, children, className, size = 'md'
     if (isOpen) {
       document.addEventListener('keydown', handleEscape)
       document.body.style.overflow = 'hidden'
-      // Focus trap
       setTimeout(() => modalRef.current?.focus(), 50)
     }
     return () => {
@@ -49,7 +48,7 @@ export function Modal({ isOpen, onClose, title, children, className, size = 'md'
       aria-label={title || 'Modal'}
     >
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm animate-fade-in"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -57,7 +56,7 @@ export function Modal({ isOpen, onClose, title, children, className, size = 'md'
         ref={modalRef}
         tabIndex={-1}
         className={cn(
-          'relative w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-t-2xl sm:rounded-2xl p-6',
+          'relative w-full bg-[#2c2c2c] rounded-t-lg sm:rounded-lg p-6',
           'animate-slide-up',
           'max-h-[90vh] overflow-y-auto',
           'focus:outline-none',
@@ -65,15 +64,20 @@ export function Modal({ isOpen, onClose, title, children, className, size = 'md'
           className
         )}
       >
+        {/* Drag handle for mobile */}
+        <div className="sm:hidden flex justify-center mb-4">
+          <div className="w-8 h-1 bg-white/15 rounded-full" />
+        </div>
+
         {title && (
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold font-[family-name:var(--font-heading)]">{title}</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-bold font-[family-name:var(--font-heading)] uppercase tracking-wider">{title}</h2>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-[#252525] rounded-lg transition-colors touch-target"
+              className="p-2 hover:bg-white/5 rounded-md transition-colors touch-target"
               aria-label="Fechar modal"
             >
-              <X size={20} className="text-[#a0a0a0]" />
+              <X size={20} className="text-white/40" />
             </button>
           </div>
         )}

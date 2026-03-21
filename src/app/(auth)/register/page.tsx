@@ -2,7 +2,7 @@
 
 import { useState, FormEvent } from 'react'
 import Link from 'next/link'
-import { Eye, EyeOff, Dumbbell, Loader2, User, GraduationCap } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
 type Role = 'STUDENT' | 'TRAINER'
@@ -34,7 +34,7 @@ export default function RegisterPage() {
     }
 
     if (password !== confirmPassword) {
-      setError('As senhas não coincidem')
+      setError('As senhas nao coincidem')
       return
     }
 
@@ -43,7 +43,7 @@ export default function RegisterPage() {
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { error?: string }; status?: number } }
       if (axiosError.response?.status === 409) {
-        setError('Este email já está cadastrado')
+        setError('Este email ja esta cadastrado')
       } else if (authError) {
         setError(authError)
       } else if (axiosError.response?.data?.error) {
@@ -55,143 +55,170 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
-      {/* Background glow effects */}
-      <div className="absolute top-[-20%] left-[-10%] w-[400px] h-[400px] rounded-full bg-red-500/5 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[300px] h-[300px] rounded-full bg-red-500/5 blur-[100px] pointer-events-none" />
-
-      {/* Logo / Brand */}
-      <div className="mb-8 flex flex-col items-center animate-[fadeInDown_0.6s_ease-out]">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center mb-4 shadow-lg shadow-red-500/20">
-          <Dumbbell className="w-8 h-8 text-white" />
+    <div className="font-[family-name:var(--font-body)] selection:bg-primary selection:text-on-primary min-h-screen flex items-center justify-center overflow-hidden bg-background p-6 relative">
+      {/* Background Decorative Elements */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/10 rounded-full blur-[120px]" />
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-primary-dim/10 rounded-full blur-[120px]" />
+        {/* Watermark text */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-[0.03] select-none pointer-events-none font-[family-name:var(--font-headline)] font-black text-[20vw] leading-none text-white whitespace-nowrap flex items-center justify-center">
+          TRON TRON TRON
         </div>
-        <h1 className="text-3xl font-[family-name:var(--font-heading)] font-bold tracking-tight">
-          TRON <span className="text-red-500">Fitness</span>
-        </h1>
-        <p className="text-[#a0a0a0] text-sm mt-1">Crie sua conta</p>
       </div>
 
-      {/* Register Form */}
-      <div className="w-full max-w-sm animate-[fadeInUp_0.6s_ease-out]">
-        <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Grid background pattern */}
+      <div
+        className="fixed inset-0 z-0 opacity-20 pointer-events-none"
+        style={{
+          backgroundImage: 'radial-gradient(circle at 2px 2px, #494847 1px, transparent 0)',
+          backgroundSize: '40px 40px',
+        }}
+      />
+
+      <main className="relative w-full max-w-md z-10">
+        {/* Logo Section */}
+        <div className="flex flex-col items-center mb-12 animate-fade-in-down">
+          <div className="mb-4">
+            <span className="material-symbols-outlined text-5xl text-primary text-glow">fitness_center</span>
+          </div>
+          <h1 className="font-[family-name:var(--font-headline)] font-bold text-3xl tracking-tighter text-on-background italic uppercase">
+            TRON <span className="text-primary">FITNESS</span>
+          </h1>
+          <p className="font-[family-name:var(--font-label)] text-xs uppercase tracking-[0.3em] text-on-surface-variant mt-2 font-medium">
+            Create your account
+          </p>
+        </div>
+
+        {/* Register Form */}
+        <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in-up">
           {/* Error Message */}
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-red-400 text-sm text-center animate-[shake_0.4s_ease-in-out]">
+            <div className="bg-error/10 rounded-md px-4 py-3 text-error text-sm text-center animate-shake">
               {error}
             </div>
           )}
 
           {/* Role Selector */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-[#a0a0a0]">Eu sou</label>
+          <div className="relative group">
+            <label className="block font-[family-name:var(--font-headline)] font-semibold text-[10px] uppercase tracking-widest text-on-surface-variant mb-2">
+              Eu sou
+            </label>
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setRole('STUDENT')}
-                className={`h-12 rounded-xl border text-sm font-medium flex items-center justify-center gap-2 transition-all duration-200 ${
+                className={`h-14 rounded-md text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-200 ${
                   role === 'STUDENT'
-                    ? 'bg-red-500/10 border-red-500/50 text-red-400'
-                    : 'bg-[#1a1a1a] border-[#2a2a2a] text-[#a0a0a0] hover:border-[#3a3a3a]'
+                    ? 'bg-primary/10 text-primary border border-primary/20'
+                    : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high'
                 }`}
               >
-                <User className="w-4 h-4" />
+                <span className="material-symbols-outlined text-lg">person</span>
                 Aluno
               </button>
               <button
                 type="button"
                 onClick={() => setRole('TRAINER')}
-                className={`h-12 rounded-xl border text-sm font-medium flex items-center justify-center gap-2 transition-all duration-200 ${
+                className={`h-14 rounded-md text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-200 ${
                   role === 'TRAINER'
-                    ? 'bg-red-500/10 border-red-500/50 text-red-400'
-                    : 'bg-[#1a1a1a] border-[#2a2a2a] text-[#a0a0a0] hover:border-[#3a3a3a]'
+                    ? 'bg-primary/10 text-primary border border-primary/20'
+                    : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high'
                 }`}
               >
-                <GraduationCap className="w-4 h-4" />
+                <span className="material-symbols-outlined text-lg">school</span>
                 Professor
               </button>
             </div>
           </div>
 
           {/* Name Field */}
-          <div className="space-y-2">
-            <label htmlFor="name" className="block text-sm font-medium text-[#a0a0a0]">
+          <div className="relative group">
+            <label className="block font-[family-name:var(--font-headline)] font-semibold text-[10px] uppercase tracking-widest text-on-surface-variant mb-2 group-focus-within:text-primary transition-colors">
               Nome completo
             </label>
-            <input
-              id="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Seu nome"
-              autoComplete="name"
-              className="w-full h-12 px-4 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] text-white placeholder-[#555] text-sm outline-none transition-all duration-200 focus:border-red-500/50 focus:ring-2 focus:ring-red-500/10"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Seu nome"
+                autoComplete="name"
+                className="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary h-14 px-4 font-[family-name:var(--font-body)] text-on-surface placeholder:text-on-surface-variant/30 rounded-md transition-all outline-none"
+              />
+              <div className="absolute bottom-0 left-0 w-full h-[1px] bg-outline-variant/20 group-focus-within:bg-primary transition-colors" />
+            </div>
           </div>
 
           {/* Email Field */}
-          <div className="space-y-2">
-            <label htmlFor="email" className="block text-sm font-medium text-[#a0a0a0]">
+          <div className="relative group">
+            <label className="block font-[family-name:var(--font-headline)] font-semibold text-[10px] uppercase tracking-widest text-on-surface-variant mb-2 group-focus-within:text-primary transition-colors">
               Email
             </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="seu@email.com"
-              autoComplete="email"
-              className="w-full h-12 px-4 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] text-white placeholder-[#555] text-sm outline-none transition-all duration-200 focus:border-red-500/50 focus:ring-2 focus:ring-red-500/10"
-            />
+            <div className="relative">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="nome@exemplo.com"
+                autoComplete="email"
+                className="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary h-14 px-4 font-[family-name:var(--font-body)] text-on-surface placeholder:text-on-surface-variant/30 rounded-md transition-all outline-none"
+              />
+              <div className="absolute bottom-0 left-0 w-full h-[1px] bg-outline-variant/20 group-focus-within:bg-primary transition-colors" />
+            </div>
           </div>
 
           {/* Password Field */}
-          <div className="space-y-2">
-            <label htmlFor="password" className="block text-sm font-medium text-[#a0a0a0]">
+          <div className="relative group">
+            <label className="block font-[family-name:var(--font-headline)] font-semibold text-[10px] uppercase tracking-widest text-on-surface-variant mb-2 group-focus-within:text-primary transition-colors">
               Senha
             </label>
             <div className="relative">
               <input
-                id="password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Minimo 6 caracteres"
                 autoComplete="new-password"
-                className="w-full h-12 px-4 pr-12 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] text-white placeholder-[#555] text-sm outline-none transition-all duration-200 focus:border-red-500/50 focus:ring-2 focus:ring-red-500/10"
+                className="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary h-14 px-4 font-[family-name:var(--font-body)] text-on-surface placeholder:text-on-surface-variant/30 rounded-md transition-all outline-none"
               />
+              <div className="absolute bottom-0 left-0 w-full h-[1px] bg-outline-variant/20 group-focus-within:bg-primary transition-colors" />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#555] hover:text-[#a0a0a0] transition-colors touch-target"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant touch-target flex items-center justify-center"
                 tabIndex={-1}
               >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                <span className="material-symbols-outlined text-sm">
+                  {showPassword ? 'visibility_off' : 'visibility'}
+                </span>
               </button>
             </div>
           </div>
 
           {/* Confirm Password Field */}
-          <div className="space-y-2">
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-[#a0a0a0]">
+          <div className="relative group">
+            <label className="block font-[family-name:var(--font-headline)] font-semibold text-[10px] uppercase tracking-widest text-on-surface-variant mb-2 group-focus-within:text-primary transition-colors">
               Confirmar senha
             </label>
             <div className="relative">
               <input
-                id="confirmPassword"
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Repita a senha"
                 autoComplete="new-password"
-                className="w-full h-12 px-4 pr-12 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] text-white placeholder-[#555] text-sm outline-none transition-all duration-200 focus:border-red-500/50 focus:ring-2 focus:ring-red-500/10"
+                className="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary h-14 px-4 font-[family-name:var(--font-body)] text-on-surface placeholder:text-on-surface-variant/30 rounded-md transition-all outline-none"
               />
+              <div className="absolute bottom-0 left-0 w-full h-[1px] bg-outline-variant/20 group-focus-within:bg-primary transition-colors" />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#555] hover:text-[#a0a0a0] transition-colors touch-target"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant touch-target flex items-center justify-center"
                 tabIndex={-1}
               >
-                {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                <span className="material-symbols-outlined text-sm">
+                  {showConfirmPassword ? 'visibility_off' : 'visibility'}
+                </span>
               </button>
             </div>
           </div>
@@ -200,60 +227,36 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full h-12 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold text-sm transition-all duration-200 hover:from-red-600 hover:to-red-700 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-red-500/20 hover:shadow-red-500/30 mt-2"
+            className="w-full kinetic-gradient h-16 rounded-md flex items-center justify-center group active:scale-95 transition-all duration-200 shadow-[0_8px_30px_rgb(226,36,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed mt-2"
           >
             {isLoading ? (
-              <span className="flex items-center justify-center gap-2">
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Criando conta...
-              </span>
+              <Loader2 className="w-5 h-5 animate-spin text-white" />
             ) : (
-              'Criar conta'
+              <>
+                <span className="font-[family-name:var(--font-headline)] font-bold text-lg uppercase tracking-tighter text-white mr-2">
+                  Criar Conta
+                </span>
+                <span className="material-symbols-outlined text-white group-hover:translate-x-1 transition-transform">
+                  arrow_forward
+                </span>
+              </>
             )}
           </button>
         </form>
 
         {/* Login Link */}
-        <p className="mt-8 text-center text-sm text-[#a0a0a0]">
-          Já tem uma conta?{' '}
-          <Link
-            href="/login"
-            className="text-red-500 font-medium hover:text-red-400 transition-colors"
-          >
-            Fazer login
-          </Link>
-        </p>
-      </div>
-
-      {/* Animations */}
-      <style jsx global>{`
-        @keyframes fadeInDown {
-          from {
-            opacity: 0;
-            transform: translateY(-20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-6px); }
-          50% { transform: translateX(6px); }
-          75% { transform: translateX(-4px); }
-        }
-      `}</style>
+        <div className="text-center mt-8">
+          <p className="font-[family-name:var(--font-label)] text-xs text-on-surface-variant">
+            Ja tem uma conta?{' '}
+            <Link
+              href="/login"
+              className="font-[family-name:var(--font-headline)] font-bold text-primary uppercase tracking-tight ml-1 hover:underline underline-offset-4"
+            >
+              Fazer Login
+            </Link>
+          </p>
+        </div>
+      </main>
     </div>
   )
 }

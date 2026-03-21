@@ -27,7 +27,7 @@ export default function AlunosPage() {
 
   useEffect(() => {
     api.get('/trainer/students')
-      .then(r => setStudents(r.data || []))
+      .then(r => setStudents(r.data?.data || []))
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [])
@@ -42,25 +42,25 @@ export default function AlunosPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900 font-[family-name:var(--font-heading)]">Alunos</h1>
+        <h1 className="text-2xl font-bold text-white font-[family-name:var(--font-heading)] uppercase tracking-wider">Alunos</h1>
         <Badge color="#3B82F6" size="md">{students.length} alunos</Badge>
       </div>
 
       {/* Filters */}
       <div className="flex gap-3">
         <div className="relative flex-1">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/35" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Buscar por nome ou email..."
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
+            className="w-full pl-10 pr-4 py-2.5 bg-[#131313] text-white rounded-md text-sm placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-red-500/20"
           />
         </div>
         <select
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
-          className="px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20"
+          className="px-4 py-2.5 bg-[#131313] text-white rounded-md text-sm focus:outline-none"
         >
           <option value="">Todos</option>
           <option value="active">Ativos</option>
@@ -69,7 +69,7 @@ export default function AlunosPage() {
       </div>
 
       {/* Students list */}
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+      <div className="bg-[#131313] rounded-md overflow-hidden">
         {loading ? (
           <div className="p-4 space-y-3">
             {[1,2,3,4,5].map(i => (
@@ -92,23 +92,23 @@ export default function AlunosPage() {
             />
           </div>
         ) : (
-          <div className="divide-y divide-gray-100">
+          <div className="space-y-0">
             {filtered.map(student => (
               <Link
                 key={student.id}
                 href={`/professor/alunos/${student.id}`}
-                className="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-4 p-4 hover:bg-white/5 transition-colors"
               >
-                <div className="w-10 h-10 bg-red-100 text-red-600 rounded-full flex items-center justify-center font-bold">
+                <div className="w-10 h-10 gradient-cta text-white rounded-full flex items-center justify-center font-bold">
                   {student.user.name.charAt(0)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 truncate">{student.user.name}</p>
-                  <p className="text-sm text-gray-500 truncate">{student.user.email}</p>
+                  <p className="font-medium text-white truncate">{student.user.name}</p>
+                  <p className="text-sm text-white/35 truncate">{student.user.email}</p>
                 </div>
                 <div className="text-right hidden sm:block">
-                  <p className="text-sm text-gray-600">{student.sessionsThisMonth} sessões/mês</p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-sm text-white/60">{student.sessionsThisMonth} sessões/mês</p>
+                  <p className="text-xs text-white/35">
                     {student.lastSession ? `Último: ${formatDate(student.lastSession)}` : 'Sem sessões'}
                   </p>
                 </div>
@@ -118,7 +118,7 @@ export default function AlunosPage() {
                 >
                   {student.status === 'active' ? 'Ativo' : 'Inativo'}
                 </Badge>
-                <ChevronRight size={18} className="text-gray-300" />
+                <ChevronRight size={18} className="text-white/35" />
               </Link>
             ))}
           </div>

@@ -20,7 +20,7 @@ export default function ProgramasPage() {
 
   const loadPrograms = () => {
     api.get('/trainer/programs')
-      .then(r => setPrograms(r.data || []))
+      .then(r => setPrograms(r.data?.data || []))
       .catch(console.error)
       .finally(() => setLoading(false))
   }
@@ -62,41 +62,41 @@ export default function ProgramasPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900 font-[family-name:var(--font-heading)]">Programas</h1>
-        <Button size="sm" onClick={() => setShowCreateModal(true)}>
+        <h1 className="text-2xl font-bold text-white font-[family-name:var(--font-heading)] uppercase tracking-wider">Programas</h1>
+        <button onClick={() => setShowCreateModal(true)} className="gradient-cta rounded-md font-semibold uppercase tracking-wider text-white px-4 py-2 text-sm flex items-center gap-2">
           <Plus size={16} /> Novo Programa
-        </Button>
+        </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+      <div className="bg-[#131313] rounded-md overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-gray-400">Carregando...</div>
+          <div className="p-8 text-center text-white/35">Carregando...</div>
         ) : programs.length === 0 ? (
-          <div className="p-8 text-center text-gray-400">
+          <div className="p-8 text-center text-white/35">
             <BookOpen size={32} className="mx-auto mb-2 opacity-50" />
             <p>Nenhum programa criado</p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-100">
+          <div className="space-y-0">
             {programs.map(program => (
-              <div key={program.id} className="flex items-center gap-4 p-4 hover:bg-gray-50">
+              <div key={program.id} className="flex items-center gap-4 p-4 hover:bg-white/5">
                 <div className="flex-1 min-w-0">
                   <Link href={`/professor/programas/${program.id}`} className="hover:underline">
-                    <p className="font-medium text-gray-900">{program.name}</p>
+                    <p className="font-medium text-white">{program.name}</p>
                   </Link>
-                  <p className="text-sm text-gray-500">{program.durationWeeks} semanas</p>
+                  <p className="text-sm text-white/35">{program.durationWeeks} semanas</p>
                 </div>
                 <div className="flex items-center gap-3">
                   {program.isTemplate && <Badge color="#8B5CF6" size="sm">Template</Badge>}
-                  <Badge color="#3B82F6" size="sm">{program._count?.assignments || 0} alunos</Badge>
-                  <button onClick={() => handleDuplicate(program.id)} className="p-1.5 hover:bg-gray-100 rounded-lg" title="Duplicar">
-                    <Copy size={16} className="text-gray-400" />
+                  <Badge color="#3B82F6" size="sm">{program.assignedStudents || 0} alunos</Badge>
+                  <button onClick={() => handleDuplicate(program.id)} className="p-1.5 hover:bg-white/5 rounded-md" title="Duplicar">
+                    <Copy size={16} className="text-white/35" />
                   </button>
-                  <button onClick={() => handleDelete(program.id)} className="p-1.5 hover:bg-gray-100 rounded-lg" title="Excluir">
+                  <button onClick={() => handleDelete(program.id)} className="p-1.5 hover:bg-white/5 rounded-md" title="Excluir">
                     <Trash2 size={16} className="text-red-400" />
                   </button>
                   <Link href={`/professor/programas/${program.id}`}>
-                    <ChevronRight size={18} className="text-gray-300" />
+                    <ChevronRight size={18} className="text-white/35" />
                   </Link>
                 </div>
               </div>
@@ -110,7 +110,9 @@ export default function ProgramasPage() {
           <Input label="Nome" value={formData.name} onChange={e => setFormData(p => ({...p, name: e.target.value}))} placeholder="Ex: Iniciante Masculino" />
           <Input label="Descrição" value={formData.description} onChange={e => setFormData(p => ({...p, description: e.target.value}))} placeholder="Descrição do programa" />
           <Input label="Duração (semanas)" type="number" value={formData.durationWeeks} onChange={e => setFormData(p => ({...p, durationWeeks: e.target.value}))} />
-          <Button fullWidth loading={saving} onClick={handleCreate}>Criar Programa</Button>
+          <button className="gradient-cta rounded-md font-semibold uppercase tracking-wider text-white w-full py-3" onClick={handleCreate} disabled={saving}>
+            {saving ? 'Criando...' : 'Criar Programa'}
+          </button>
         </div>
       </Modal>
     </div>

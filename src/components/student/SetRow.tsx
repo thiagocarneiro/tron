@@ -1,6 +1,5 @@
 'use client'
 
-import { Check } from 'lucide-react'
 import { cn } from '@/utils/formatters'
 
 interface SetRowProps {
@@ -27,11 +26,11 @@ const setTypeLabels: Record<string, string> = {
 }
 
 const setTypeColors: Record<string, string> = {
-  WARMUP: '#FF9500',
-  FEEDER_1: '#FF9500',
-  FEEDER_2: '#FF9500',
-  WORKING: '#FF3B30',
-  BACKOFF: '#AF52DE',
+  WARMUP: '#adaaaa',
+  FEEDER_1: '#fe7e90',
+  FEEDER_2: '#fe7e90',
+  WORKING: '#ff8e80',
+  BACKOFF: '#d7a0ff',
 }
 
 export function SetRow({
@@ -49,23 +48,32 @@ export function SetRow({
   disabled,
 }: SetRowProps) {
   const color = setTypeColors[setType]
+  const isWorking = setType === 'WORKING'
 
   return (
     <div className={cn(
-      'flex items-center gap-2 py-3 px-3 rounded-xl transition-all duration-200',
+      'relative flex items-center gap-3 py-4 px-4 rounded-lg transition-all duration-200 overflow-hidden',
       completed
-        ? 'bg-green-500/10 border border-green-500/20'
-        : 'bg-[#1a1a1a] border border-[#2a2a2a]'
+        ? 'bg-green-500/10'
+        : isWorking
+          ? 'bg-primary/5'
+          : 'bg-surface-container-high/50'
     )}>
+      {/* Set type color bar */}
+      <div
+        className={cn('absolute left-0 top-2 bottom-2 rounded-full', isWorking ? 'w-[3px]' : 'w-[2px]')}
+        style={{ backgroundColor: color }}
+      />
+
       {/* Set type label */}
-      <div className="w-20 flex-shrink-0">
+      <div className="w-20 flex-shrink-0 pl-2">
         <span
-          className="text-[10px] font-semibold uppercase tracking-wider"
+          className="text-[10px] font-bold uppercase tracking-widest"
           style={{ color }}
         >
           {setTypeLabels[setType]} {setNumber}
         </span>
-        <p className="text-[10px] text-[#555]">{targetReps} reps</p>
+        <p className="text-[10px] text-on-surface-variant/60 uppercase tracking-widest">{targetReps} reps</p>
       </div>
 
       {/* Weight input */}
@@ -79,14 +87,14 @@ export function SetRow({
           placeholder={previousWeight ? `${previousWeight}` : 'kg'}
           aria-label={`Peso ${setTypeLabels[setType]} ${setNumber}`}
           className={cn(
-            'w-full px-2 py-2.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg text-center text-sm',
-            'focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500/30 placeholder-[#333]',
+            'w-full px-2 py-3 bg-surface-container-low rounded-md text-center text-2xl font-bold font-[family-name:var(--font-headline)] tabular-nums text-on-surface',
+            'focus:outline-none focus:ring-1 focus:ring-primary/30 placeholder-on-surface-variant/30 placeholder:text-base placeholder:font-normal',
             'transition-all duration-200',
             completed && 'opacity-60'
           )}
           disabled={disabled || completed}
         />
-        <p className="text-[8px] text-[#444] text-center mt-0.5">KG</p>
+        <p className="text-[9px] font-bold text-on-surface-variant text-center mt-0.5 uppercase tracking-widest">KG</p>
       </div>
 
       {/* Reps input */}
@@ -97,16 +105,16 @@ export function SetRow({
           value={reps}
           onChange={e => onRepsChange(e.target.value)}
           placeholder={previousReps ? `${previousReps}` : '0'}
-          aria-label={`Repetições ${setTypeLabels[setType]} ${setNumber}`}
+          aria-label={`Repeticoes ${setTypeLabels[setType]} ${setNumber}`}
           className={cn(
-            'w-full px-2 py-2.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg text-center text-sm',
-            'focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500/30 placeholder-[#333]',
+            'w-full px-2 py-3 bg-surface-container-low rounded-md text-center text-2xl font-bold font-[family-name:var(--font-headline)] tabular-nums text-on-surface',
+            'focus:outline-none focus:ring-1 focus:ring-primary/30 placeholder-on-surface-variant/30 placeholder:text-base placeholder:font-normal',
             'transition-all duration-200',
             completed && 'opacity-60'
           )}
           disabled={disabled || completed}
         />
-        <p className="text-[8px] text-[#444] text-center mt-0.5">REPS</p>
+        <p className="text-[9px] font-bold text-on-surface-variant text-center mt-0.5 uppercase tracking-widest">REPS</p>
       </div>
 
       {/* Complete button */}
@@ -115,13 +123,18 @@ export function SetRow({
         disabled={disabled || completed}
         aria-label={completed ? 'Set completado' : 'Completar set'}
         className={cn(
-          'w-11 h-11 flex-shrink-0 rounded-xl flex items-center justify-center transition-all duration-200 touch-target',
+          'w-11 h-11 flex-shrink-0 rounded-md flex items-center justify-center transition-all duration-200 touch-target',
           completed
-            ? 'bg-green-500 text-white shadow-md shadow-green-500/20'
-            : 'bg-[#0a0a0a] border border-[#2a2a2a] text-[#555] hover:border-green-500 hover:text-green-500 active:scale-95'
+            ? 'text-primary animate-complete-pop'
+            : 'text-surface-variant hover:text-primary active:scale-95'
         )}
       >
-        <Check size={18} strokeWidth={completed ? 3 : 2} />
+        <span
+          className="material-symbols-outlined"
+          style={completed ? { fontVariationSettings: "'FILL' 1" } : undefined}
+        >
+          {completed ? 'check_circle' : 'radio_button_unchecked'}
+        </span>
       </button>
     </div>
   )

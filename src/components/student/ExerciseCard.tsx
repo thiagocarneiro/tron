@@ -1,9 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, ChevronUp, Play } from 'lucide-react'
-import { Badge } from '@/components/ui/Badge'
-import { cn } from '@/utils/formatters'
 
 interface ExerciseCardProps {
   name: string
@@ -29,108 +26,164 @@ interface ExerciseCardProps {
 }
 
 export function ExerciseCard(props: ExerciseCardProps) {
-  const [expanded, setExpanded] = useState(false)
+  const [expanded, setExpanded] = useState(props.orderIndex === 0)
 
-  const renderWorkingSet = () => {
+  const renderWorkingSetLabel = () => {
+    const config = props.workingSetConfig
+    if (config.type === 'cluster') return 'Cluster Set'
+    if (config.type === 'isometric') return 'Isometric'
+    return 'Working Set'
+  }
+
+  const renderWorkingSetReps = () => {
     const config = props.workingSetConfig
     if (config.type === 'straight') {
-      return `${config.sets} séries × ${config.reps || config.duration} reps — Descanso: ${config.rest}`
+      return (
+        <p className="font-[family-name:var(--font-headline)] text-lg font-bold">
+          {config.sets} <span className="text-sm font-normal text-on-surface-variant">x</span> {config.reps || config.duration}
+        </p>
+      )
     }
     if (config.type === 'cluster') {
-      return `Cluster-Set: ${config.blocks} blocos × ${config.repsPerBlock} reps — Intra-rest: ${config.intraRest}`
+      return (
+        <p className="font-[family-name:var(--font-headline)] text-lg font-bold">
+          {config.blocks} <span className="text-sm font-normal text-on-surface-variant">x</span> {config.repsPerBlock}
+        </p>
+      )
     }
     if (config.type === 'isometric') {
-      return `${config.sets} séries × ${config.duration} (isométrico) — Descanso: ${config.rest}`
+      return (
+        <p className="font-[family-name:var(--font-headline)] text-lg font-bold">
+          {config.sets} <span className="text-sm font-normal text-on-surface-variant">x</span> {config.duration}
+        </p>
+      )
     }
-    return ''
+    return null
   }
 
   return (
-    <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl overflow-hidden">
+    <div className="bg-surface-container-low rounded-xl overflow-hidden">
       {/* Header - always visible */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center gap-3 p-4 text-left"
+        className="w-full p-5 flex items-start justify-between border-b border-outline-variant/10 text-left"
       >
-        <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[#252525] text-sm font-bold text-[#a0a0a0]">
-          {props.orderIndex + 1}
-        </span>
-        <div className="flex-1 min-w-0">
-          <h4 className="font-medium truncate">{props.name}</h4>
-          <div className="flex flex-wrap gap-1 mt-1">
-            {props.muscleGroups.map(g => (
-              <span key={g} className="text-xs text-[#666]">{g}</span>
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="text-primary font-[family-name:var(--font-headline)] font-black text-lg italic">
+              {String(props.orderIndex + 1).padStart(2, '0')}
+            </span>
+            <h3 className="font-[family-name:var(--font-headline)] font-bold text-lg uppercase tracking-wide">
+              {props.name}
+            </h3>
+          </div>
+          <div className="flex flex-wrap gap-2 pt-1">
+            {(props.muscleGroups || []).map(g => (
+              <span key={g} className="text-[10px] uppercase font-bold text-on-surface-variant tracking-wider bg-surface-container-high px-2 py-1 rounded">
+                {g}
+              </span>
             ))}
           </div>
         </div>
-        {expanded ? <ChevronUp size={18} className="text-[#555]" /> : <ChevronDown size={18} className="text-[#555]" />}
+
+        {props.videoUrl ? (
+          <a
+            href={props.videoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="w-10 h-10 bg-surface-container-highest rounded-full flex items-center justify-center text-primary-fixed hover:bg-primary-container hover:text-on-primary-container transition-all flex-shrink-0"
+          >
+            <span className="material-symbols-outlined">play_circle</span>
+          </a>
+        ) : (
+          <span className="material-symbols-outlined text-on-surface-variant/30">
+            {expanded ? 'expand_less' : 'expand_more'}
+          </span>
+        )}
       </button>
 
-      {/* Expanded content */}
+      {/* Expanded content with set hierarchy */}
       {expanded && (
-        <div className="px-4 pb-4 space-y-3 border-t border-[#2a2a2a] pt-3">
-          {props.equipmentOptions && (
-            <p className="text-xs text-[#666]">🏋️ Equipamento: {props.equipmentOptions}</p>
-          )}
-
-          {props.videoUrl && (
-            <a
-              href={props.videoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-600/10 text-red-400 rounded-lg text-sm hover:bg-red-600/20 transition-colors"
-            >
-              <Play size={14} /> Ver Vídeo
-            </a>
-          )}
-
-          <div className="space-y-2">
+        <div className="p-5 space-y-4">
+          <div className="grid grid-cols-1 gap-3">
             {/* Warmup */}
             {props.hasWarmup && props.warmupConfig && (
-              <div className="flex items-start gap-2">
-                <Badge color="#FF9500" size="sm">Aquecimento</Badge>
-                <span className="text-sm text-[#a0a0a0]">
-                  {props.warmupConfig.sets}×{props.warmupConfig.reps} reps — {props.warmupConfig.note}
-                </span>
+              <div className="flex items-center justify-between bg-surface-container-high/50 p-3 rounded-lg border-l-2 border-on-surface-variant/30">
+                <div>
+                  <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Warmup</span>
+                  <p className="font-[family-name:var(--font-headline)] text-lg font-bold">
+                    {props.warmupConfig.sets} <span className="text-sm font-normal text-on-surface-variant">x</span> {props.warmupConfig.reps}
+                  </p>
+                </div>
+                <span className="text-xs text-on-surface-variant/60 font-medium">RPE 4-5</span>
               </div>
             )}
 
             {/* Feeder 1 */}
             {props.feeder1Config && (
-              <div className="flex items-start gap-2">
-                <Badge color="#FF9500" size="sm">Feeder 1</Badge>
-                <span className="text-sm text-[#a0a0a0]">
-                  {props.feeder1Config.reps} reps — Descanso: {props.feeder1Config.rest}
-                </span>
+              <div className="flex items-center justify-between bg-surface-container-high/50 p-3 rounded-lg border-l-2 border-secondary/40">
+                <div>
+                  <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Feeder 1</span>
+                  <p className="font-[family-name:var(--font-headline)] text-lg font-bold">
+                    1 <span className="text-sm font-normal text-on-surface-variant">x</span> {props.feeder1Config.reps}
+                  </p>
+                </div>
+                <span className="text-xs text-on-surface-variant/60 font-medium">Build to load</span>
               </div>
             )}
 
             {/* Feeder 2 */}
             {props.feeder2Config && (
-              <div className="flex items-start gap-2">
-                <Badge color="#FF9500" size="sm">Feeder 2</Badge>
-                <span className="text-sm text-[#a0a0a0]">
-                  {props.feeder2Config.reps} reps — Descanso: {props.feeder2Config.rest}
-                </span>
+              <div className="flex items-center justify-between bg-surface-container-high/50 p-3 rounded-lg border-l-2 border-secondary/40">
+                <div>
+                  <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Feeder 2</span>
+                  <p className="font-[family-name:var(--font-headline)] text-lg font-bold">
+                    1 <span className="text-sm font-normal text-on-surface-variant">x</span> {props.feeder2Config.reps}
+                  </p>
+                </div>
+                <span className="text-xs text-on-surface-variant/60 font-medium">Build to load</span>
               </div>
             )}
 
             {/* Working Set */}
-            <div className="flex items-start gap-2">
-              <Badge color="#FF3B30" size="sm">Working Set</Badge>
-              <span className="text-sm text-[#a0a0a0]">{renderWorkingSet()}</span>
+            <div className="flex items-center justify-between bg-primary/5 p-3 rounded-lg border-l-2 border-primary">
+              <div>
+                <span className="text-[10px] font-bold text-primary uppercase tracking-widest">{renderWorkingSetLabel()}</span>
+                {renderWorkingSetReps()}
+              </div>
+              <div className="text-right">
+                {props.workingSetConfig.rest && (
+                  <>
+                    <span className="text-xs text-primary font-bold block">RPE 9</span>
+                    <span className="text-[10px] text-on-surface-variant uppercase">{props.workingSetConfig.rest} Rest</span>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Back-off */}
             {props.backoffConfig && (
-              <div className="flex items-start gap-2">
-                <Badge color="#AF52DE" size="sm">Back-off</Badge>
-                <span className="text-sm text-[#a0a0a0]">
-                  {props.backoffConfig.reps} reps — Descanso: {props.backoffConfig.rest}
-                </span>
+              <div className="flex items-center justify-between bg-surface-container-high/50 p-3 rounded-lg border-l-2 border-tertiary/40">
+                <div>
+                  <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Back-off</span>
+                  <p className="font-[family-name:var(--font-headline)] text-lg font-bold">
+                    2 <span className="text-sm font-normal text-on-surface-variant">x</span> {props.backoffConfig.reps}
+                  </p>
+                </div>
+                <span className="text-xs text-on-surface-variant/60 font-medium">-15% Load</span>
               </div>
             )}
           </div>
+
+          {/* Equipment note */}
+          {props.equipmentOptions && (
+            <div className="pt-2">
+              <p className="text-xs text-on-surface-variant leading-relaxed italic">
+                Equipamento: {props.equipmentOptions}
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>

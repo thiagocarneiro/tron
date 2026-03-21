@@ -66,33 +66,33 @@ export default function ProgramDetailPage() {
       </div>
     </div>
   )
-  if (!program) return <div className="p-8 text-center text-gray-400">Programa não encontrado</div>
+  if (!program) return <div className="p-8 text-center text-white/35">Programa não encontrado</div>
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <button onClick={() => router.back()} className="p-2 hover:bg-gray-100 rounded-xl">
-          <ArrowLeft size={20} className="text-gray-600" />
+        <button onClick={() => router.back()} className="p-2 hover:bg-white/5 rounded-md">
+          <ArrowLeft size={20} className="text-white/60" />
         </button>
         <div>
-          <h1 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-heading)]">{program.name}</h1>
-          <p className="text-sm text-gray-500">{program.durationWeeks} semanas</p>
+          <h1 className="text-xl font-bold text-white font-[family-name:var(--font-heading)] uppercase tracking-wider">{program.name}</h1>
+          <p className="text-sm text-white/35">{program.durationWeeks} semanas</p>
         </div>
       </div>
 
       {program.description && (
-        <p className="text-gray-600">{program.description}</p>
+        <p className="text-white/60">{program.description}</p>
       )}
 
       {/* Phases */}
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-3 font-[family-name:var(--font-heading)]">Fases</h2>
+        <h2 className="text-lg font-semibold text-white mb-3 font-[family-name:var(--font-heading)] uppercase tracking-wider">Fases</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           {(program.phases || []).sort((a, b) => a.orderIndex - b.orderIndex).map((phase) => (
-            <div key={phase.id} className="bg-white rounded-xl border border-gray-200 p-4" style={{ borderLeftColor: phase.color, borderLeftWidth: 4 }}>
-              <p className="font-medium text-gray-900">{phase.name}</p>
-              <p className="text-sm text-gray-500">Semanas {phase.weekStart}–{phase.weekEnd}</p>
-              <p className="text-xs text-gray-400 mt-2">{phase.description}</p>
+            <div key={phase.id} className="bg-[#131313] rounded-md p-4" style={{ borderLeftColor: phase.color, borderLeftWidth: 4, borderLeftStyle: 'solid' }}>
+              <p className="font-medium text-white">{phase.name}</p>
+              <p className="text-sm text-white/35">Semanas {phase.weekStart}–{phase.weekEnd}</p>
+              <p className="text-xs text-white/35 mt-2">{phase.description}</p>
             </div>
           ))}
         </div>
@@ -100,30 +100,30 @@ export default function ProgramDetailPage() {
 
       {/* Workouts */}
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-3 font-[family-name:var(--font-heading)]">Treinos</h2>
+        <h2 className="text-lg font-semibold text-white mb-3 font-[family-name:var(--font-heading)] uppercase tracking-wider">Treinos</h2>
         <div className="space-y-3">
           {(program.workouts || []).sort((a, b) => a.orderIndex - b.orderIndex).map((workout) => (
-            <div key={workout.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div key={workout.id} className="bg-[#131313] rounded-md overflow-hidden">
               <button
                 onClick={() => setExpandedWorkout(expandedWorkout === workout.id ? null : workout.id)}
-                className="w-full flex items-center gap-3 p-4 text-left hover:bg-gray-50"
+                className="w-full flex items-center gap-3 p-4 text-left hover:bg-white/5"
               >
                 <span className="text-2xl">{workout.icon}</span>
                 <div className="flex-1">
-                  <p className="font-medium text-gray-900">{workout.name}</p>
-                  <p className="text-sm text-gray-500">{workout.exercises?.length || 0} exercícios</p>
+                  <p className="font-medium text-white">{workout.name}</p>
+                  <p className="text-sm text-white/35">{workout.exercises?.length || 0} exercícios</p>
                 </div>
-                <ChevronDown size={18} className={cn('text-gray-400 transition-transform', expandedWorkout === workout.id && 'rotate-180')} />
+                <ChevronDown size={18} className={cn('text-white/35 transition-transform', expandedWorkout === workout.id && 'rotate-180')} />
               </button>
 
               {expandedWorkout === workout.id && workout.exercises && (
-                <div className="border-t border-gray-200 p-4 space-y-2">
+                <div className="p-4 space-y-2">
                   {workout.exercises.sort((a, b) => a.orderIndex - b.orderIndex).map((ex, i) => (
-                    <div key={ex.id} className="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
-                      <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs text-gray-500">{i+1}</span>
+                    <div key={ex.id} className="flex items-center gap-3 py-2">
+                      <span className="w-6 h-6 bg-[#201f1f] rounded-full flex items-center justify-center text-xs text-white/35">{i+1}</span>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">{ex.exercise?.name || ex.name}</p>
-                        <p className="text-xs text-gray-400">
+                        <p className="text-sm font-medium text-white">{ex.exercise?.name || ex.name}</p>
+                        <p className="text-xs text-white/35">
                           {ex.exercise?.muscleGroups?.join(', ') || ex.muscleGroups?.join(', ')}
                         </p>
                       </div>
@@ -144,16 +144,16 @@ export default function ProgramDetailPage() {
       {/* Rotations */}
       {(program.rotations?.length ?? 0) > 0 && (
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-3 font-[family-name:var(--font-heading)]">Rotações</h2>
+          <h2 className="text-lg font-semibold text-white mb-3 font-[family-name:var(--font-heading)] uppercase tracking-wider">Rotações</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {program.rotations!.map((rotation) => (
-              <div key={rotation.id} className="bg-white rounded-xl border border-gray-200 p-4">
-                <p className="font-medium text-gray-900 mb-2">{rotation.label}</p>
+              <div key={rotation.id} className="bg-[#131313] rounded-md p-4">
+                <p className="font-medium text-white mb-2">{rotation.label}</p>
                 <div className="grid grid-cols-7 gap-1">
                   {(rotation.slots || []).sort((a, b) => a.dayOfWeek - b.dayOfWeek).map((slot, i) => (
                     <div key={i} className="text-center">
-                      <p className="text-[10px] text-gray-400 mb-1">{['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'][slot.dayOfWeek]}</p>
-                      <div className={`py-1 rounded text-xs font-medium ${slot.isRest ? 'bg-gray-100 text-gray-400' : 'bg-red-50 text-red-600'}`}>
+                      <p className="text-[10px] text-white/35 mb-1">{['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'][slot.dayOfWeek]}</p>
+                      <div className={`py-1 rounded-md text-xs font-medium ${slot.isRest ? 'bg-[#201f1f] text-white/35' : 'bg-red-500/10 text-red-400'}`}>
                         {slot.displayLabel}
                       </div>
                     </div>
@@ -168,14 +168,14 @@ export default function ProgramDetailPage() {
       {/* Tips */}
       {(program.tips?.length ?? 0) > 0 && (
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-3 font-[family-name:var(--font-heading)]">Dicas</h2>
+          <h2 className="text-lg font-semibold text-white mb-3 font-[family-name:var(--font-heading)] uppercase tracking-wider">Dicas</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {program.tips!.map((tip) => (
-              <div key={tip.id} className="bg-white rounded-xl border border-gray-200 p-4 flex gap-3">
+              <div key={tip.id} className="bg-[#131313] rounded-md p-4 flex gap-3">
                 <span className="text-xl">{tip.icon}</span>
                 <div>
-                  <p className="font-medium text-gray-900 text-sm">{tip.title}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{tip.text}</p>
+                  <p className="font-medium text-white text-sm">{tip.title}</p>
+                  <p className="text-xs text-white/35 mt-0.5">{tip.text}</p>
                 </div>
               </div>
             ))}

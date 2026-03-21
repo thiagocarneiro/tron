@@ -39,15 +39,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const icons = {
-    success: <CheckCircle size={18} className="text-green-400 shrink-0" />,
-    error: <AlertCircle size={18} className="text-red-400 shrink-0" />,
-    info: <Info size={18} className="text-blue-400 shrink-0" />,
-  }
-
-  const colors = {
-    success: 'border-green-500/30 bg-green-950/30',
-    error: 'border-red-500/30 bg-red-950/30',
-    info: 'border-blue-500/30 bg-blue-950/30',
+    success: <CheckCircle size={18} className="text-[#22C55E] shrink-0" />,
+    error: <AlertCircle size={18} className="text-[#EF4444] shrink-0" />,
+    info: <Info size={18} className="text-[#3B82F6] shrink-0" />,
   }
 
   return (
@@ -60,17 +54,16 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             role="alert"
             aria-live="polite"
             className={cn(
-              'flex items-center gap-3 px-4 py-3 border rounded-xl shadow-2xl pointer-events-auto',
-              'animate-slide-in backdrop-blur-md',
+              'flex items-center gap-3 px-4 py-3 rounded-md pointer-events-auto',
+              'animate-slide-in glass',
               'sm:min-w-[320px] sm:max-w-[420px]',
-              colors[toast.type]
             )}
           >
             {icons[toast.type]}
             <span className="text-sm text-white flex-1">{toast.message}</span>
             <button
               onClick={() => removeToast(toast.id)}
-              className="ml-2 text-[#666] hover:text-white transition-colors touch-target"
+              className="ml-2 text-white/30 hover:text-white transition-colors touch-target"
               aria-label="Fechar notificação"
             >
               <X size={14} />

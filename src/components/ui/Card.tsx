@@ -4,16 +4,24 @@ import { cn } from '@/utils/formatters'
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   hoverable?: boolean
-  padding?: 'sm' | 'md' | 'lg'
+  padding?: 'sm' | 'md' | 'lg' | 'none'
+  surface?: 'low' | 'high' | 'bright'
 }
 
-export function Card({ className, hoverable, padding = 'md', children, ...props }: CardProps) {
-  const paddings = { sm: 'p-3', md: 'p-4', lg: 'p-6' }
+const surfaceClasses = {
+  low: 'bg-[#131313]',
+  high: 'bg-[#201f1f]',
+  bright: 'bg-[#2c2c2c]',
+}
+
+export function Card({ className, hoverable, padding = 'md', surface = 'high', children, ...props }: CardProps) {
+  const paddings = { none: '', sm: 'p-4', md: 'p-5', lg: 'p-6' }
   return (
     <div
       className={cn(
-        'bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl',
-        hoverable && 'hover:bg-[#252525] hover:border-[#333] transition-all duration-200 cursor-pointer active:scale-[0.98]',
+        'rounded-md',
+        surfaceClasses[surface],
+        hoverable && 'hover:bg-[#2c2c2c] transition-colors duration-200 cursor-pointer active:scale-[0.98]',
         paddings[padding],
         className
       )}

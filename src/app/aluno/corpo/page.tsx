@@ -4,11 +4,10 @@ import { useEffect, useState } from 'react'
 import { Plus, Camera, Scale, Ruler, RefreshCw, Trash2 } from 'lucide-react'
 import api from '@/api/client'
 import { ProgressChart } from '@/components/student/ProgressChart'
-import { Card } from '@/components/ui/Card'
+import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
-import { Badge } from '@/components/ui/Badge'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { useToast } from '@/components/ui/Toast'
@@ -85,9 +84,9 @@ export default function CorpoPage() {
     setLoading(true)
     setError(false)
     Promise.all([
-      api.get('/student/measurements?limit=20').then(r => setMeasurements(r.data?.measurements || r.data || [])),
+      api.get('/student/measurements?limit=20').then(r => setMeasurements(r.data?.data || [])),
       api.get('/student/measurements?chart=true').then(r => {
-        const data = r.data?.data || r.data || []
+        const data = r.data || []
         setChartData(data)
       }),
       api.get('/student/photos').then(r => setPhotos(r.data || [])),
@@ -124,7 +123,7 @@ export default function CorpoPage() {
       setMeasurementForm({})
       // Reload
       const res = await api.get('/student/measurements?limit=20')
-      setMeasurements(res.data?.measurements || res.data || [])
+      setMeasurements(res.data?.data || [])
     } catch {
       showToast('Erro ao salvar medição', 'error')
     } finally {
@@ -203,14 +202,14 @@ export default function CorpoPage() {
   if (error) {
     return (
       <div className="p-4 pt-16 text-center safe-top animate-fade-in">
-        <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 rounded-md bg-red-500/10 flex items-center justify-center mx-auto mb-4">
           <Ruler size={28} className="text-red-400" />
         </div>
         <p className="text-white font-medium mb-1">Erro ao carregar dados</p>
-        <p className="text-sm text-[#666] mb-4">Não foi possível carregar suas medições.</p>
+        <p className="text-sm text-white/35 mb-4">Não foi possível carregar suas medições.</p>
         <button
           onClick={loadData}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] hover:bg-[#252525] border border-[#2a2a2a] text-white rounded-xl text-sm transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-[#131313] hover:bg-white/5 text-white rounded-md text-sm transition-colors"
         >
           <RefreshCw size={16} />
           Tentar novamente
@@ -222,14 +221,20 @@ export default function CorpoPage() {
   return (
     <div className="p-4 space-y-6 safe-top animate-fade-in">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold font-[family-name:var(--font-heading)]">Corpo</h1>
+        <h1 className="text-2xl font-bold font-[family-name:var(--font-heading)] uppercase tracking-wider">Corpo</h1>
         <div className="flex gap-2">
-          <Button variant="secondary" size="sm" onClick={() => setShowMeasurementModal(true)}>
+          <button
+            onClick={() => setShowMeasurementModal(true)}
+            className="flex items-center gap-1.5 px-3 py-2 bg-[#201f1f] rounded-md text-sm font-medium text-white hover:bg-white/5 transition-colors"
+          >
             <Scale size={16} /> Medir
-          </Button>
-          <Button variant="secondary" size="sm" onClick={() => setShowPhotoModal(true)}>
+          </button>
+          <button
+            onClick={() => setShowPhotoModal(true)}
+            className="flex items-center gap-1.5 px-3 py-2 bg-[#201f1f] rounded-md text-sm font-medium text-white hover:bg-white/5 transition-colors"
+          >
             <Camera size={16} /> Foto
-          </Button>
+          </button>
         </div>
       </div>
 
@@ -240,10 +245,10 @@ export default function CorpoPage() {
             key={opt.key}
             onClick={() => setSelectedMetric(opt.key)}
             className={cn(
-              'flex-shrink-0 px-3 py-2 rounded-full text-xs font-medium transition-all duration-200 touch-target',
+              'flex-shrink-0 px-3 py-2 rounded-md text-xs font-medium transition-all duration-200 touch-target',
               selectedMetric === opt.key
                 ? 'text-white shadow-lg'
-                : 'bg-[#1a1a1a] text-[#666] border border-[#2a2a2a] hover:bg-[#1f1f1f]'
+                : 'bg-[#201f1f] text-white/35 hover:bg-white/5'
             )}
             style={selectedMetric === opt.key ? {
               backgroundColor: opt.color,
@@ -256,23 +261,25 @@ export default function CorpoPage() {
       </div>
 
       {/* Chart */}
-      <ProgressChart
-        data={chartData}
-        color={selectedMetricInfo?.color || '#30D158'}
-        yAxisLabel={selectedMetricInfo?.label}
-      />
+      <div className="bg-[#131313] rounded-md p-3">
+        <ProgressChart
+          data={chartData}
+          color={selectedMetricInfo?.color || '#30D158'}
+          yAxisLabel={selectedMetricInfo?.label}
+        />
+      </div>
 
       {/* Measurements History */}
       <div>
-        <h2 className="text-sm font-medium text-[#a0a0a0] mb-3">Histórico de Medições</h2>
+        <h2 className="label-caps mb-3">Histórico de Medições</h2>
         {measurements.length > 0 ? (
           <div className="space-y-2">
             {measurements.slice(0, 5).map((m, i) => {
               const prev = measurements[i + 1]
               return (
-                <Card key={m.id} padding="sm" hoverable>
+                <div key={m.id} className="bg-[#201f1f] rounded-md p-3 hover:bg-white/5 transition-colors">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-[#666]">{formatDate(m.date)}</p>
+                    <p className="text-xs text-white/35">{formatDate(m.date)}</p>
                     <div className="flex gap-3">
                       {m.weight != null && (
                         <div className="text-right">
@@ -280,7 +287,7 @@ export default function CorpoPage() {
                           {prev?.weight != null && (
                             <p className={cn(
                               'text-[10px] font-medium',
-                              m.weight - prev.weight > 0 ? 'text-red-400' : m.weight - prev.weight < 0 ? 'text-green-400' : 'text-[#555]'
+                              m.weight - prev.weight > 0 ? 'text-red-400' : m.weight - prev.weight < 0 ? 'text-green-400' : 'text-white/35'
                             )}>
                               {m.weight - prev.weight > 0 ? '+' : ''}{(m.weight - prev.weight).toFixed(1)}
                             </p>
@@ -290,12 +297,12 @@ export default function CorpoPage() {
                       {m.bodyFat != null && (
                         <div className="text-right">
                           <p className="text-sm font-bold">{m.bodyFat}%</p>
-                          <p className="text-[10px] text-[#555]">gordura</p>
+                          <p className="text-[10px] text-white/35">gordura</p>
                         </div>
                       )}
                     </div>
                   </div>
-                </Card>
+                </div>
               )
             })}
           </div>
@@ -311,22 +318,22 @@ export default function CorpoPage() {
 
       {/* Photos */}
       <div>
-        <h2 className="text-sm font-medium text-[#a0a0a0] mb-3">Fotos de Progresso</h2>
+        <h2 className="label-caps mb-3">Fotos de Progresso</h2>
         {photos.length > 0 ? (
           <div className="grid grid-cols-3 gap-2">
             {photos.map(photo => (
-              <div key={photo.id} className="relative aspect-[3/4] rounded-xl overflow-hidden bg-[#1a1a1a] group">
+              <div key={photo.id} className="relative aspect-[3/4] rounded-md overflow-hidden bg-[#131313] group">
                 <img src={photo.imageUrl} alt={`Foto ${photo.angle}`} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                 <button
                   onClick={() => handleDeletePhoto(photo.id)}
-                  className="absolute top-2 right-2 w-7 h-7 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/80"
+                  className="absolute top-2 right-2 w-7 h-7 bg-black/60 backdrop-blur-sm rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/80"
                   aria-label="Excluir foto"
                 >
                   <Trash2 size={14} className="text-white" />
                 </button>
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-2">
                   <Badge size="sm">{photo.angle === 'FRONT' ? 'Frente' : photo.angle === 'SIDE' ? 'Lateral' : 'Costas'}</Badge>
-                  <p className="text-[10px] text-[#a0a0a0] mt-0.5">{formatDate(photo.date)}</p>
+                  <p className="text-[10px] text-white/60 mt-0.5">{formatDate(photo.date)}</p>
                 </div>
               </div>
             ))}
@@ -367,7 +374,7 @@ export default function CorpoPage() {
       <Modal isOpen={showPhotoModal} onClose={() => setShowPhotoModal(false)} title="Nova Foto" size="sm">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-[#a0a0a0] mb-2">Ângulo</label>
+            <label className="label-caps block mb-2">Ângulo</label>
             <div className="flex gap-2">
               {[
                 { key: 'FRONT', label: 'Frente' },
@@ -378,10 +385,10 @@ export default function CorpoPage() {
                   key={angle.key}
                   onClick={() => setPhotoAngle(angle.key)}
                   className={cn(
-                    'flex-1 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
+                    'flex-1 py-2.5 rounded-md text-sm font-medium transition-all duration-200',
                     photoAngle === angle.key
-                      ? 'bg-[#FF3B30] text-white shadow-lg shadow-red-500/20'
-                      : 'bg-[#252525] text-[#666] hover:bg-[#2a2a2a]'
+                      ? 'gradient-cta text-white shadow-lg shadow-red-500/20'
+                      : 'bg-[#2c2c2c] text-white/35 hover:bg-white/5'
                   )}
                 >
                   {angle.label}
@@ -390,11 +397,11 @@ export default function CorpoPage() {
             </div>
           </div>
           <label className="block cursor-pointer">
-            <div className="flex items-center justify-center h-32 bg-[#252525] border-2 border-dashed border-[#333] rounded-xl hover:border-[#FF3B30] hover:bg-[#1a0a0a] transition-all duration-200">
+            <div className="flex items-center justify-center h-32 bg-[#131313] rounded-md hover:bg-[#1a0a0a] transition-all duration-200">
               <div className="text-center">
-                <Camera size={24} className="mx-auto text-[#555] mb-2" />
-                <p className="text-sm text-[#555]">Toque para selecionar</p>
-                <p className="text-[10px] text-[#444] mt-1">Máximo 5MB</p>
+                <Camera size={24} className="mx-auto text-white/35 mb-2" />
+                <p className="text-sm text-white/35">Toque para selecionar</p>
+                <p className="text-[10px] text-white/25 mt-1">Máximo 5MB</p>
               </div>
             </div>
             <input
@@ -407,7 +414,7 @@ export default function CorpoPage() {
             />
           </label>
           {saving && (
-            <div className="flex items-center justify-center gap-2 text-sm text-[#a0a0a0]">
+            <div className="flex items-center justify-center gap-2 text-sm text-white/60">
               <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-[#FF3B30]" />
               Enviando foto...
             </div>

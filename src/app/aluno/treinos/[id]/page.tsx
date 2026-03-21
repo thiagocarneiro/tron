@@ -2,12 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowLeft, Play } from 'lucide-react'
 import api from '@/api/client'
 import { ExerciseCard } from '@/components/student/ExerciseCard'
-import { Button } from '@/components/ui/Button'
 import { Skeleton } from '@/components/ui/Skeleton'
-import { Badge } from '@/components/ui/Badge'
 
 interface WorkoutDetail {
   id: string
@@ -49,7 +46,31 @@ export default function WorkoutDetailPage() {
   useEffect(() => {
     if (params.id) {
       api.get(`/student/workouts/${params.id}`)
-        .then(res => setWorkout(res.data))
+        .then(res => {
+          const data = res.data
+          setWorkout({
+            ...data,
+            exercises: (data.exercises || []).map((we: Record<string, unknown>) => {
+              const ex = we.exercise as Record<string, unknown> || {}
+              const phaseConfig = we.phaseConfig as Record<string, unknown> | null
+              return {
+                id: ex.id,
+                workoutExerciseId: we.id,
+                name: ex.name,
+                equipmentOptions: ex.equipmentOptions,
+                muscleGroups: ex.muscleGroups || [],
+                videoUrl: ex.videoUrl,
+                orderIndex: we.orderIndex,
+                hasWarmup: we.hasWarmup,
+                warmupConfig: we.warmupConfig,
+                feeder1Config: we.feeder1Config,
+                feeder2Config: we.feeder2Config,
+                workingSetConfig: phaseConfig?.workingSetConfig || { type: 'straight', sets: 3, reps: '8-10', rest: '2min' },
+                backoffConfig: phaseConfig?.backoffConfig || null,
+              }
+            }),
+          })
+        })
         .catch(console.error)
         .finally(() => setLoading(false))
     }
@@ -59,7 +80,6 @@ export default function WorkoutDetailPage() {
     if (!workout) return
     setStartingSession(true)
     try {
-      // Get current phase week
       const phaseRes = await api.get('/student/program/phase')
       const { data: session } = await api.post('/student/sessions', {
         workoutId: workout.id,
@@ -87,38 +107,55 @@ export default function WorkoutDetailPage() {
   if (!workout) {
     return (
       <div className="p-4 pt-12 text-center">
-        <p className="text-[#a0a0a0]">Treino não encontrado</p>
+        <p className="text-on-surface-variant">Treino nao encontrado</p>
       </div>
     )
   }
 
+  const sortedExercises = [...workout.exercises].sort((a, b) => a.orderIndex - b.orderIndex)
+
   return (
-    <div className="pb-24">
-      {/* Header */}
-      <div className="sticky top-0 bg-[#0a0a0a]/90 backdrop-blur-lg border-b border-[#1a1a1a] p-4 z-10 safe-top">
-        <div className="flex items-center gap-3">
-          <button onClick={() => router.back()} className="p-2 hover:bg-[#1a1a1a] rounded-xl transition-colors">
-            <ArrowLeft size={20} />
+    <div className="bg-background text-on-background font-[family-name:var(--font-body)]">
+      {/* Sticky Workout Header (Sub-Header) */}
+      <div className="sticky top-16 lg:top-0 z-40 bg-surface-container-low px-6 py-4 flex items-center justify-between border-b border-primary/10">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => router.back()}
+            className="text-primary active:scale-95 duration-200"
+          >
+            <span className="material-symbols-outlined">arrow_back</span>
           </button>
+          <div className="w-12 h-12 bg-surface-container-high rounded-lg flex items-center justify-center border border-outline-variant/15">
+            <span className="material-symbols-outlined text-primary text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>fitness_center</span>
+          </div>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">{workout.icon}</span>
-              <h1 className="text-lg font-bold font-[family-name:var(--font-heading)]">{workout.name}</h1>
+            <h1 className="font-[family-name:var(--font-headline)] font-bold text-xl uppercase tracking-tight">
+              {workout.name}
+            </h1>
+            <div className="flex items-center gap-2 mt-1">
+              {workout.currentPhase && (
+                <span
+                  className="text-[10px] font-bold px-2 py-0.5 rounded tracking-widest uppercase"
+                  style={{
+                    backgroundColor: `${workout.currentPhase.color}20`,
+                    color: workout.currentPhase.color,
+                  }}
+                >
+                  {workout.currentPhase.name}
+                </span>
+              )}
+              <span className="text-on-surface-variant text-xs font-medium">
+                {sortedExercises.length} exercicios
+              </span>
             </div>
-            {workout.currentPhase && (
-              <Badge color={workout.currentPhase.color} size="sm" className="mt-1">
-                {workout.currentPhase.name} (Sem. {workout.currentPhase.weekStart}–{workout.currentPhase.weekEnd})
-              </Badge>
-            )}
           </div>
         </div>
       </div>
 
-      {/* Exercise list */}
-      <div className="p-4 space-y-3">
-        {workout.exercises
-          .sort((a, b) => a.orderIndex - b.orderIndex)
-          .map(exercise => (
+      {/* Exercise List */}
+      <main className="pt-4 pb-32 px-4 space-y-4">
+        <section className="space-y-4">
+          {sortedExercises.map(exercise => (
             <ExerciseCard
               key={exercise.workoutExerciseId}
               name={exercise.name}
@@ -134,20 +171,48 @@ export default function WorkoutDetailPage() {
               orderIndex={exercise.orderIndex}
             />
           ))}
-      </div>
+        </section>
 
-      {/* Fixed bottom button */}
-      <div className="fixed bottom-20 left-0 right-0 p-4 bg-gradient-to-t from-[#0a0a0a] to-transparent pt-8">
-        <Button
-          fullWidth
-          size="lg"
-          loading={startingSession}
+        {/* Muscle Intensity Heatmap */}
+        <section className="bg-surface-container-low p-6 rounded-xl border border-outline-variant/10">
+          <h4 className="font-[family-name:var(--font-headline)] font-bold text-sm uppercase tracking-widest mb-4">
+            Mapa de Intensidade Muscular
+          </h4>
+          <div className="grid grid-cols-4 gap-2">
+            <div className="h-12 bg-primary rounded-sm flex items-end p-1">
+              <span className="text-[8px] font-black uppercase text-on-primary">Peito</span>
+            </div>
+            <div className="h-12 bg-primary-container rounded-sm flex items-end p-1">
+              <span className="text-[8px] font-black uppercase text-on-primary-container">Ombro</span>
+            </div>
+            <div className="h-12 bg-secondary-container rounded-sm flex items-end p-1">
+              <span className="text-[8px] font-black uppercase text-on-secondary-container">Tri</span>
+            </div>
+            <div className="h-12 bg-surface-container-highest rounded-sm flex items-end p-1 opacity-40">
+              <span className="text-[8px] font-black uppercase text-on-surface-variant">Pernas</span>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* Fixed Bottom Button */}
+      <div className="fixed bottom-0 w-full p-4 bg-[#0e0e0e]/90 backdrop-blur-xl border-t border-[#FF3B30]/10 z-50 lg:bottom-0">
+        <button
+          disabled={startingSession}
           onClick={handleStartSession}
-          className="shadow-lg shadow-red-500/20"
+          className="w-full kinetic-gradient h-16 rounded-lg flex items-center justify-center gap-3 active:scale-95 duration-200 shadow-[0_0_30px_rgba(255,59,48,0.3)] group disabled:opacity-60"
         >
-          <Play size={20} />
-          Iniciar Treino
-        </Button>
+          {startingSession ? (
+            <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-white" />
+          ) : (
+            <>
+              <span className="material-symbols-outlined text-white text-2xl group-hover:animate-pulse">play_arrow</span>
+              <span className="font-[family-name:var(--font-headline)] font-black text-white text-lg uppercase tracking-tighter italic">
+                Iniciar Treino
+              </span>
+            </>
+          )}
+        </button>
       </div>
     </div>
   )

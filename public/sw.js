@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tron-fitness-v1'
+const CACHE_NAME = 'tron-fitness-v2'
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',

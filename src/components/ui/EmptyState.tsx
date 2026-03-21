@@ -1,6 +1,7 @@
 'use client'
 import { type LucideIcon } from 'lucide-react'
 import { cn } from '@/utils/formatters'
+import { Button } from './Button'
 
 interface EmptyStateProps {
   icon: LucideIcon
@@ -15,21 +16,18 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon: Icon, title, description, action, className }: EmptyStateProps) {
   return (
-    <div className={cn('flex flex-col items-center justify-center py-12 px-4 text-center', className)}>
-      <div className="w-16 h-16 rounded-2xl bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center mb-4">
-        <Icon size={28} className="text-[#555]" />
+    <div className={cn('flex flex-col items-center justify-center py-16 px-4 text-center', className)}>
+      <div className="w-16 h-16 rounded-md bg-[#201f1f] flex items-center justify-center mb-6">
+        <Icon size={28} className="text-white/25" />
       </div>
-      <h3 className="text-base font-medium text-white mb-1">{title}</h3>
+      <h3 className="text-base font-bold font-[family-name:var(--font-heading)] uppercase tracking-wider text-white mb-2">{title}</h3>
       {description && (
-        <p className="text-sm text-[#a0a0a0] max-w-sm">{description}</p>
+        <p className="text-sm text-white/40 max-w-sm">{description}</p>
       )}
       {action && (
-        <button
-          onClick={action.onClick}
-          className="mt-4 px-4 py-2 bg-[#FF3B30] hover:bg-[#E0342B] text-white rounded-xl text-sm font-medium transition-colors"
-        >
+        <Button onClick={action.onClick} size="md" className="mt-6">
           {action.label}
-        </button>
+        </Button>
       )}
     </div>
   )

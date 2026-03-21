@@ -1,7 +1,6 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { Badge } from '@/components/ui/Badge'
 
 interface WorkoutCardProps {
   id: string
@@ -9,29 +8,96 @@ interface WorkoutCardProps {
   icon: string
   exerciseCount: number
   muscleGroups: string[]
+  phaseColor?: string
+  orderIndex: number
+  isFirst?: boolean
 }
 
-export function WorkoutCard({ id, name, icon, exerciseCount, muscleGroups }: WorkoutCardProps) {
+const WORKOUT_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+
+export function WorkoutCard({ id, name, exerciseCount, muscleGroups, orderIndex, isFirst }: WorkoutCardProps) {
   const router = useRouter()
+  const letter = WORKOUT_LETTERS[orderIndex] || String.fromCharCode(65 + orderIndex)
 
   return (
     <div
-      onClick={() => router.push(`/aluno/treinos/${id}`)}
-      className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl p-4 hover:bg-[#252525] hover:border-[#333] transition-all duration-200 cursor-pointer active:scale-[0.98]"
+      className={`group relative overflow-hidden rounded-xl hover:translate-y-[-4px] transition-all duration-300 border border-outline-variant/5 ${
+        isFirst ? 'bg-surface-container-high' : 'bg-surface-container-low hover:bg-surface-container-high'
+      }`}
     >
-      <div className="flex items-center gap-3 mb-3">
-        <div className="text-3xl">{icon}</div>
-        <div>
-          <h3 className="font-semibold font-[family-name:var(--font-heading)]">{name}</h3>
-          <p className="text-sm text-[#a0a0a0]">{exerciseCount} exercícios</p>
-        </div>
+      {/* Floating icon */}
+      <div className="absolute top-0 right-0 p-4">
+        <span className="material-symbols-outlined text-primary/40 group-hover:text-primary transition-colors">fitness_center</span>
       </div>
-      <div className="flex flex-wrap gap-1.5">
-        {muscleGroups.slice(0, 5).map(group => (
-          <Badge key={group} size="sm">{group}</Badge>
-        ))}
-        {muscleGroups.length > 5 && (
-          <Badge size="sm">+{muscleGroups.length - 5}</Badge>
+
+      {/* HOJE badge on first card */}
+      {isFirst && (
+        <div className="absolute top-4 left-4 z-10">
+          <span className="bg-primary px-3 py-1 text-black font-[family-name:var(--font-headline)] font-black text-xs uppercase tracking-widest">
+            HOJE
+          </span>
+        </div>
+      )}
+
+      <div className="p-6 lg:p-8">
+        {/* Label: letter + type */}
+        <span className={`text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-1 block ${isFirst ? 'mt-6 lg:mt-0' : ''}`}>
+          {letter} - {name.replace(/\d+/g, '').trim().toUpperCase() || 'WORKOUT'}
+        </span>
+
+        {/* Workout name */}
+        <h3 className="text-2xl lg:text-3xl font-[family-name:var(--font-headline)] font-bold uppercase tracking-tight mb-4 lg:mb-6 group-hover:text-primary transition-colors">
+          {name}
+        </h3>
+
+        <div className="space-y-4 mb-6 lg:mb-8">
+          {/* Exercise count */}
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-on-surface-variant uppercase font-bold tracking-widest">Exercicios</span>
+            <span className="text-lg font-[family-name:var(--font-headline)] font-bold tabular-nums">
+              {String(exerciseCount).padStart(2, '0')}
+            </span>
+          </div>
+
+          {/* Muscle group tags */}
+          <div className="flex flex-wrap gap-2">
+            {muscleGroups.slice(0, 5).map(group => (
+              <span
+                key={group}
+                className="px-3 py-1 bg-surface-container-highest rounded text-[10px] font-bold uppercase tracking-tighter"
+              >
+                {group}
+              </span>
+            ))}
+            {muscleGroups.length > 5 && (
+              <span className="px-3 py-1 bg-surface-container-highest rounded text-[10px] font-bold uppercase tracking-tighter">
+                +{muscleGroups.length - 5}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* CTA Button */}
+        {isFirst ? (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              router.push(`/aluno/treinos/${id}`)
+            }}
+            className="w-full py-4 border border-primary/30 text-primary font-[family-name:var(--font-headline)] font-black text-sm tracking-widest hover:bg-primary hover:text-black transition-all"
+          >
+            INICIAR TREINO
+          </button>
+        ) : (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              router.push(`/aluno/treinos/${id}`)
+            }}
+            className="w-full py-4 bg-surface-container-highest text-on-surface-variant font-[family-name:var(--font-headline)] font-black text-sm tracking-widest hover:bg-primary/20 hover:text-primary transition-all"
+          >
+            VER DETALHES
+          </button>
         )}
       </div>
     </div>

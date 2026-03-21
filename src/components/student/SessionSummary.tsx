@@ -5,7 +5,6 @@ import { Star, Clock, Dumbbell, TrendingUp } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { formatDuration, formatWeight } from '@/utils/formatters'
-import { cn } from '@/utils/formatters'
 
 interface NewPR {
   exerciseName: string
@@ -39,40 +38,40 @@ export function SessionSummary({
   const [notes, setNotes] = useState('')
 
   return (
-    <Modal isOpen={isOpen} onClose={() => {}} title="Treino Finalizado! 💪" size="md">
+    <Modal isOpen={isOpen} onClose={() => {}} title="Treino Finalizado!" size="md">
       <div className="space-y-6">
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-[#252525] rounded-xl p-3 text-center">
+          <div className="bg-[#131313] rounded-md p-3 text-center">
             <Clock size={20} className="mx-auto text-blue-400 mb-1" />
-            <p className="text-lg font-bold font-[family-name:var(--font-heading)]">{formatDuration(duration)}</p>
-            <p className="text-xs text-[#666]">Duração</p>
+            <p className="text-lg font-bold font-[family-name:var(--font-heading)] tabular-nums text-white">{formatDuration(duration)}</p>
+            <p className="text-[9px] font-semibold text-white/35 uppercase tracking-widest">Duração</p>
           </div>
-          <div className="bg-[#252525] rounded-xl p-3 text-center">
+          <div className="bg-[#131313] rounded-md p-3 text-center">
             <Dumbbell size={20} className="mx-auto text-green-400 mb-1" />
-            <p className="text-lg font-bold font-[family-name:var(--font-heading)]">{exercisesCompleted}/{totalExercises}</p>
-            <p className="text-xs text-[#666]">Exercícios</p>
+            <p className="text-lg font-bold font-[family-name:var(--font-heading)] tabular-nums text-white">{exercisesCompleted}/{totalExercises}</p>
+            <p className="text-[9px] font-semibold text-white/35 uppercase tracking-widest">Exercícios</p>
           </div>
-          <div className="bg-[#252525] rounded-xl p-3 text-center">
+          <div className="bg-[#131313] rounded-md p-3 text-center">
             <TrendingUp size={20} className="mx-auto text-purple-400 mb-1" />
-            <p className="text-lg font-bold font-[family-name:var(--font-heading)]">{formatWeight(totalVolume)}</p>
-            <p className="text-xs text-[#666]">Volume Total</p>
+            <p className="text-lg font-bold font-[family-name:var(--font-heading)] tabular-nums text-white">{formatWeight(totalVolume)}</p>
+            <p className="text-[9px] font-semibold text-white/35 uppercase tracking-widest">Volume Total</p>
           </div>
-          <div className="bg-[#252525] rounded-xl p-3 text-center">
+          <div className="bg-[#131313] rounded-md p-3 text-center">
             <Star size={20} className="mx-auto text-amber-400 mb-1" />
-            <p className="text-lg font-bold font-[family-name:var(--font-heading)]">{newPRs.length}</p>
-            <p className="text-xs text-[#666]">Novos PRs</p>
+            <p className="text-lg font-bold font-[family-name:var(--font-heading)] tabular-nums text-white">{newPRs.length}</p>
+            <p className="text-[9px] font-semibold text-white/35 uppercase tracking-widest">Novos PRs</p>
           </div>
         </div>
 
         {/* New PRs */}
         {newPRs.length > 0 && (
           <div className="space-y-2">
-            <h4 className="text-sm font-medium text-amber-400">🏆 Recordes Pessoais</h4>
+            <h4 className="text-[9px] font-semibold uppercase tracking-widest text-amber-400">Recordes Pessoais</h4>
             {newPRs.map((pr, i) => (
-              <div key={i} className="flex items-center justify-between bg-amber-500/10 border border-amber-500/20 rounded-xl px-3 py-2">
-                <span className="text-sm">{pr.exerciseName}</span>
-                <span className="text-sm font-bold">{pr.weight}kg × {pr.reps}</span>
+              <div key={i} className="flex items-center justify-between bg-amber-500/10 rounded-md px-3 py-2">
+                <span className="text-sm text-white">{pr.exerciseName}</span>
+                <span className="text-sm font-bold font-[family-name:var(--font-heading)] tabular-nums text-white">{pr.weight}kg × {pr.reps}</span>
               </div>
             ))}
           </div>
@@ -80,7 +79,7 @@ export function SessionSummary({
 
         {/* Rating */}
         <div>
-          <label className="block text-sm font-medium text-[#a0a0a0] mb-2">Como foi o treino?</label>
+          <label className="block text-[9px] font-semibold uppercase tracking-widest text-white/35 mb-2">Como foi o treino?</label>
           <div className="flex gap-2 justify-center">
             {[1,2,3,4,5].map(i => (
               <button
@@ -88,7 +87,7 @@ export function SessionSummary({
                 onClick={() => setRating(i)}
                 className="text-3xl transition-transform hover:scale-110"
               >
-                <span className={i <= rating ? 'text-amber-400' : 'text-[#333]'}>★</span>
+                <span className={i <= rating ? 'text-amber-400' : 'text-white/10'}>★</span>
               </button>
             ))}
           </div>
@@ -96,7 +95,7 @@ export function SessionSummary({
 
         {/* RPE */}
         <div>
-          <label className="block text-sm font-medium text-[#a0a0a0] mb-2">
+          <label className="block text-[9px] font-semibold uppercase tracking-widest text-white/35 mb-2">
             RPE (Esforço Percebido): <span className="text-white font-bold">{rpe}</span>
           </label>
           <input
@@ -108,7 +107,7 @@ export function SessionSummary({
             onChange={e => setRpe(parseFloat(e.target.value))}
             className="w-full accent-red-500"
           />
-          <div className="flex justify-between text-xs text-[#555] mt-1">
+          <div className="flex justify-between text-[9px] text-white/25 uppercase tracking-widest mt-1">
             <span>Fácil</span>
             <span>Moderado</span>
             <span>Máximo</span>
@@ -117,24 +116,23 @@ export function SessionSummary({
 
         {/* Notes */}
         <div>
-          <label className="block text-sm font-medium text-[#a0a0a0] mb-2">Observações</label>
+          <label className="block text-[9px] font-semibold uppercase tracking-widest text-white/35 mb-2">Observações</label>
           <textarea
             value={notes}
             onChange={e => setNotes(e.target.value)}
             placeholder="Como você se sentiu? Algo a notar?"
-            className="w-full px-4 py-2.5 bg-[#252525] border border-[#333] rounded-xl text-white placeholder-[#555] resize-none h-20 focus:outline-none focus:border-red-500"
+            className="w-full px-4 py-2.5 bg-[#131313] rounded-md text-white placeholder-white/25 resize-none h-20 focus:outline-none focus:ring-1 focus:ring-[#ff8e80]/30 transition-all duration-200"
           />
         </div>
 
         {/* Submit */}
-        <Button
-          fullWidth
-          size="lg"
-          loading={loading}
+        <button
           onClick={() => onSubmit({ rating, rpe, notes })}
+          disabled={loading}
+          className="w-full py-3 rounded-md bg-gradient-to-r from-[#FF3B30] to-[#ff8e80] text-white font-semibold text-sm uppercase tracking-wider transition-all duration-200 hover:shadow-[0_0_20px_rgba(255,59,48,0.3)] disabled:opacity-50"
         >
-          Salvar e Finalizar
-        </Button>
+          {loading ? 'Salvando...' : 'Salvar e Finalizar'}
+        </button>
       </div>
     </Modal>
   )

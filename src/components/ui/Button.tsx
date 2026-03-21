@@ -3,24 +3,24 @@ import { ButtonHTMLAttributes, forwardRef } from 'react'
 import { cn } from '@/utils/formatters'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'
-  size?: 'sm' | 'md' | 'lg'
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
+  size?: 'sm' | 'md' | 'lg' | 'xl'
   loading?: boolean
   fullWidth?: boolean
 }
 
 const variants = {
-  primary: 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white shadow-lg shadow-red-500/20',
-  secondary: 'bg-[#1a1a1a] hover:bg-[#252525] text-white border border-[#2a2a2a]',
-  outline: 'border border-[#2a2a2a] hover:bg-[#1a1a1a] text-white',
-  ghost: 'hover:bg-[#1a1a1a] text-[#a0a0a0] hover:text-white',
-  danger: 'bg-red-600 hover:bg-red-700 text-white',
+  primary: 'gradient-cta text-white shadow-[0_4px_24px_rgba(255,59,48,0.25)] hover:shadow-[0_4px_32px_rgba(255,59,48,0.35)]',
+  secondary: 'ghost-border text-[#ff8e80] hover:bg-white/5',
+  ghost: 'text-white/60 hover:text-white hover:bg-white/5',
+  danger: 'bg-[#EF4444] text-white hover:bg-[#DC2626]',
 }
 
 const sizes = {
-  sm: 'px-3 py-1.5 text-sm',
-  md: 'px-4 py-2.5 text-sm',
-  lg: 'px-6 py-3 text-base',
+  sm: 'px-4 py-2 text-xs',
+  md: 'px-5 py-3 text-sm',
+  lg: 'px-6 py-3.5 text-sm',
+  xl: 'px-8 py-4 text-base',
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -29,7 +29,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={cn(
-          'inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all duration-200 touch-target',
+          'inline-flex items-center justify-center gap-2 rounded-md font-semibold uppercase tracking-wider transition-all duration-200 touch-target',
           'active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none',
           variants[variant],
           sizes[size],

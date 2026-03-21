@@ -37,7 +37,7 @@ export default function ExerciciosPage() {
     if (search) params.set('search', search)
     if (muscleFilter) params.set('muscleGroup', muscleFilter)
     api.get(`/trainer/exercises?${params}`)
-      .then(r => setExercises(r.data || []))
+      .then(r => setExercises(r.data?.data || []))
       .catch(console.error)
       .finally(() => setLoading(false))
   }
@@ -45,7 +45,7 @@ export default function ExerciciosPage() {
   useEffect(loadExercises, [search, muscleFilter])
 
   // Get unique muscle groups for filter
-  const allMuscleGroups = [...new Set(exercises.flatMap(e => e.muscleGroups))].sort()
+  const allMuscleGroups = [...new Set(exercises.flatMap(e => e.muscleGroups || []))].sort()
 
   const openCreate = () => {
     setEditingId(null)
@@ -102,33 +102,33 @@ export default function ExerciciosPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900 font-[family-name:var(--font-heading)]">Exercícios</h1>
-        <Button size="sm" onClick={openCreate}>
+        <h1 className="text-2xl font-bold text-white font-[family-name:var(--font-heading)] uppercase tracking-wider">Exercícios</h1>
+        <button onClick={openCreate} className="gradient-cta rounded-md font-semibold uppercase tracking-wider text-white px-4 py-2 text-sm flex items-center gap-2">
           <Plus size={16} /> Novo Exercício
-        </Button>
+        </button>
       </div>
 
       <div className="flex gap-3">
         <div className="relative flex-1">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/35" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Buscar exercício..."
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
+            className="w-full pl-10 pr-4 py-2.5 bg-[#131313] text-white rounded-md text-sm placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-red-500/20"
           />
         </div>
         <select
           value={muscleFilter}
           onChange={e => setMuscleFilter(e.target.value)}
-          className="px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none"
+          className="px-4 py-2.5 bg-[#131313] text-white rounded-md text-sm focus:outline-none"
         >
           <option value="">Todos os músculos</option>
           {allMuscleGroups.map(g => <option key={g} value={g}>{g}</option>)}
         </select>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+      <div className="bg-[#131313] rounded-md overflow-hidden">
         {loading ? (
           <div className="p-4 space-y-3">
             {[1,2,3,4,5].map(i => (
@@ -145,35 +145,35 @@ export default function ExerciciosPage() {
             ))}
           </div>
         ) : exercises.length === 0 ? (
-          <div className="p-8 text-center text-gray-400">
+          <div className="p-8 text-center text-white/35">
             <Dumbbell size={32} className="mx-auto mb-2 opacity-50" />
             <p>{search || muscleFilter ? 'Nenhum exercício encontrado' : 'Nenhum exercício cadastrado'}</p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-100">
+          <div className="space-y-0">
             {exercises.map(ex => (
-              <div key={ex.id} className="flex items-center gap-4 p-4 hover:bg-gray-50">
+              <div key={ex.id} className="flex items-center gap-4 p-4 hover:bg-white/5">
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900">{ex.name}</p>
+                  <p className="font-medium text-white">{ex.name}</p>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {ex.muscleGroups.map(g => (
+                    {(ex.muscleGroups || []).map(g => (
                       <Badge key={g} size="sm" color="#6B7280">{g}</Badge>
                     ))}
                   </div>
                   {ex.equipmentOptions && (
-                    <p className="text-xs text-gray-400 mt-1">🏋️ {ex.equipmentOptions}</p>
+                    <p className="text-xs text-white/35 mt-1">🏋️ {ex.equipmentOptions}</p>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
                   {ex.videoUrl && (
-                    <a href={ex.videoUrl} target="_blank" rel="noopener noreferrer" className="p-1.5 hover:bg-gray-100 rounded-lg">
+                    <a href={ex.videoUrl} target="_blank" rel="noopener noreferrer" className="p-1.5 hover:bg-white/5 rounded-md">
                       <Play size={16} className="text-red-500" />
                     </a>
                   )}
-                  <button onClick={() => openEdit(ex)} className="p-1.5 hover:bg-gray-100 rounded-lg">
-                    <Edit2 size={16} className="text-gray-400" />
+                  <button onClick={() => openEdit(ex)} className="p-1.5 hover:bg-white/5 rounded-md">
+                    <Edit2 size={16} className="text-white/35" />
                   </button>
-                  <button onClick={() => handleDelete(ex.id)} className="p-1.5 hover:bg-gray-100 rounded-lg">
+                  <button onClick={() => handleDelete(ex.id)} className="p-1.5 hover:bg-white/5 rounded-md">
                     <Trash2 size={16} className="text-red-400" />
                   </button>
                 </div>
@@ -191,17 +191,17 @@ export default function ExerciciosPage() {
           <Input label="Grupos Musculares (separados por vírgula)" value={form.muscleGroups} onChange={e => setForm(p => ({...p, muscleGroups: e.target.value}))} placeholder="Ex: Peito, Tríceps, Ombro" />
           <Input label="Link do Vídeo" value={form.videoUrl} onChange={e => setForm(p => ({...p, videoUrl: e.target.value}))} placeholder="https://youtube.com/..." />
           <div>
-            <label className="block text-sm font-medium text-[#a0a0a0] mb-1.5">Instruções</label>
+            <label className="block text-xs uppercase tracking-wider text-white/50 mb-1.5">Instruções</label>
             <textarea
               value={form.instructions}
               onChange={e => setForm(p => ({...p, instructions: e.target.value}))}
               placeholder="Descrição da execução..."
-              className="w-full px-4 py-2.5 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl text-white placeholder-[#555] resize-none h-20 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-4 py-2.5 bg-[#131313] rounded-md text-white placeholder-white/20 resize-none h-20 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-[box-shadow] duration-200"
             />
           </div>
-          <Button fullWidth loading={saving} onClick={handleSave}>
-            {editingId ? 'Salvar Alterações' : 'Criar Exercício'}
-          </Button>
+          <button className="gradient-cta rounded-md font-semibold uppercase tracking-wider text-white w-full py-3" onClick={handleSave} disabled={saving}>
+            {saving ? 'Salvando...' : editingId ? 'Salvar Alterações' : 'Criar Exercício'}
+          </button>
         </div>
       </Modal>
     </div>
