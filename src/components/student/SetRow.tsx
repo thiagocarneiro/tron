@@ -21,7 +21,7 @@ const setTypeLabels: Record<string, string> = {
   WARMUP: 'Aquecimento',
   FEEDER_1: 'Feeder 1',
   FEEDER_2: 'Feeder 2',
-  WORKING: 'Working Set',
+  WORKING: 'Série de Trabalho',
   BACKOFF: 'Back-off',
 }
 

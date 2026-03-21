@@ -8,17 +8,17 @@ import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { useAuth } from '@/hooks/useAuth'
 
 const mobileNavTabs = [
-  { href: '/aluno/treinos', label: 'Workouts', icon: 'fitness_center', iconFill: true },
-  { href: '/aluno/progresso', label: 'Progress', icon: 'leaderboard', iconFill: false },
-  { href: '/aluno/corpo', label: 'Body', icon: 'accessibility_new', iconFill: false },
-  { href: '/aluno/mais', label: 'More', icon: 'more_horiz', iconFill: false },
+  { href: '/aluno/treinos', label: 'Treinos', icon: 'fitness_center', iconFill: true },
+  { href: '/aluno/progresso', label: 'Progresso', icon: 'leaderboard', iconFill: false },
+  { href: '/aluno/corpo', label: 'Corpo', icon: 'accessibility_new', iconFill: false },
+  { href: '/aluno/mais', label: 'Mais', icon: 'more_horiz', iconFill: false },
 ]
 
 const sidebarNavItems = [
-  { href: '/aluno/treinos', label: 'Workouts', icon: 'fitness_center' },
-  { href: '/aluno/progresso', label: 'Progress', icon: 'insights' },
-  { href: '/aluno/corpo', label: 'Body', icon: 'accessibility_new' },
-  { href: '/aluno/mais', label: 'Settings', icon: 'settings' },
+  { href: '/aluno/treinos', label: 'Treinos', icon: 'fitness_center' },
+  { href: '/aluno/progresso', label: 'Progresso', icon: 'insights' },
+  { href: '/aluno/corpo', label: 'Corpo', icon: 'accessibility_new' },
+  { href: '/aluno/mais', label: 'Configurações', icon: 'settings' },
 ]
 
 export default function AlunoLayout({ children }: { children: React.ReactNode }) {
@@ -94,7 +94,7 @@ export default function AlunoLayout({ children }: { children: React.ReactNode })
                   href="/aluno/treinos"
                   className="block w-full kinetic-gradient text-black font-[family-name:var(--font-headline)] font-black py-4 rounded-md tracking-widest text-sm text-center active:scale-95 transition-all"
                 >
-                  START SESSION
+                  INICIAR SESSÃO
                 </Link>
 
                 {/* Support & Logout */}
@@ -104,14 +104,14 @@ export default function AlunoLayout({ children }: { children: React.ReactNode })
                     className="flex items-center gap-4 px-4 py-2 text-gray-500 hover:text-white font-[family-name:var(--font-headline)] transition-all"
                   >
                     <span className="material-symbols-outlined">help</span>
-                    <span>Support</span>
+                    <span>Suporte</span>
                   </Link>
                   <button
                     onClick={() => logout()}
                     className="flex items-center gap-4 px-4 py-2 text-gray-500 hover:text-white font-[family-name:var(--font-headline)] transition-all w-full"
                   >
                     <span className="material-symbols-outlined">logout</span>
-                    <span>Logout</span>
+                    <span>Sair</span>
                   </button>
                 </div>
               </div>

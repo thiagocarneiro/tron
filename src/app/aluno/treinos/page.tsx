@@ -163,13 +163,13 @@ export default function TreinosPage() {
         </div>
         <div className="flex gap-8 border-l border-outline-variant/30 pl-8 flex-shrink-0">
           <div className="text-right">
-            <span className="block text-on-surface-variant text-xs font-bold uppercase tracking-widest mb-1">DURACAO</span>
+            <span className="block text-on-surface-variant text-xs font-bold uppercase tracking-widest mb-1">DURAÇÃO</span>
             <span className="text-4xl font-[family-name:var(--font-headline)] font-light tracking-tight tabular-nums">
               {program.durationWeeks} <span className="text-xl">WKS</span>
             </span>
           </div>
           <div className="text-right">
-            <span className="block text-on-surface-variant text-xs font-bold uppercase tracking-widest mb-1">SESSOES</span>
+            <span className="block text-on-surface-variant text-xs font-bold uppercase tracking-widest mb-1">SESSÕES</span>
             <span className="text-4xl font-[family-name:var(--font-headline)] font-light tracking-tight tabular-nums">
               08/{totalSessions}
             </span>
@@ -264,7 +264,7 @@ export default function TreinosPage() {
       {/* ===================== DESKTOP: Section Header ===================== */}
       <div className="hidden lg:flex items-center justify-between mb-8">
         <h2 className="text-3xl font-[family-name:var(--font-headline)] font-black uppercase tracking-tighter">
-          Sessoes Disponiveis
+          Sessões Disponíveis
         </h2>
         <div className="flex gap-2">
           <button className="p-2 border border-outline-variant/20 rounded-md text-on-surface-variant hover:text-white hover:bg-surface-container-high transition-all">
@@ -309,7 +309,7 @@ export default function TreinosPage() {
             </h3>
             <div className="flex flex-col items-center justify-center py-6 text-center">
               <span className="material-symbols-outlined text-4xl mb-2 text-on-surface-variant">timer</span>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Recuperacao ativa</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Recuperação ativa</p>
             </div>
           </div>
         </div>
@@ -358,7 +358,7 @@ export default function TreinosPage() {
         <div className="col-span-2 glass-panel p-8 rounded-xl border border-outline-variant/10">
           <div className="flex items-center gap-3 mb-6">
             <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>bar_chart</span>
-            <h4 className="font-[family-name:var(--font-headline)] font-bold uppercase tracking-widest text-sm">Saturacao de Volume</h4>
+            <h4 className="font-[family-name:var(--font-headline)] font-bold uppercase tracking-widest text-sm">Saturação de Volume</h4>
           </div>
           <div className="flex gap-1 h-32 items-end">
             {[50, 66, 33, 80, 50].map((h, i) => (
@@ -374,13 +374,13 @@ export default function TreinosPage() {
         </div>
 
         <div className="bg-surface-container-low p-8 rounded-xl border border-outline-variant/5">
-          <h4 className="font-[family-name:var(--font-headline)] font-bold uppercase tracking-widest text-xs text-on-surface-variant mb-4">Proximo Repouso</h4>
+          <h4 className="font-[family-name:var(--font-headline)] font-bold uppercase tracking-widest text-xs text-on-surface-variant mb-4">Próximo Repouso</h4>
           <div className="flex items-baseline gap-2">
             <span className="text-5xl font-[family-name:var(--font-headline)] font-black text-white tabular-nums">48</span>
             <span className="text-xl font-[family-name:var(--font-headline)] font-bold text-primary">HRS</span>
           </div>
           <p className="mt-4 text-xs font-[family-name:var(--font-body)] text-on-surface-variant leading-relaxed">
-            Janela de recuperacao otimizada com base no volume das ultimas 72h.
+            Janela de recuperação otimizada com base no volume das últimas 72h.
           </p>
         </div>
 

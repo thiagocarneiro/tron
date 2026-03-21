@@ -11,6 +11,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState('')
 
   async function handleSubmit(e: FormEvent) {
@@ -23,7 +24,7 @@ export default function LoginPage() {
     }
 
     try {
-      await login(email, password)
+      await login(email, password, rememberMe)
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { error?: string }; status?: number } }
       if (axiosError.response?.status === 401) {
@@ -214,18 +215,18 @@ export default function LoginPage() {
           </div>
 
           <p className="text-on-surface-variant font-[family-name:var(--font-body)] text-lg max-w-md leading-relaxed">
-            The high-intensity digital spotter for elite athletes. Access your tactical training dashboard and push beyond your genetic limits.
+            O spotter digital de alta intensidade para atletas de elite. Acesse seu painel tático de treinamento e supere seus limites genéticos.
           </p>
 
           <div className="pt-8 flex items-center gap-8">
             <div className="flex flex-col">
               <span className="font-[family-name:var(--font-headline)] text-3xl font-bold text-on-background tabular-nums">124k+</span>
-              <span className="font-[family-name:var(--font-label)] text-xs uppercase tracking-widest text-outline">Sessions Logged</span>
+              <span className="font-[family-name:var(--font-label)] text-xs uppercase tracking-widest text-outline">Sessões Registradas</span>
             </div>
             <div className="w-px h-10 bg-outline-variant/30" />
             <div className="flex flex-col">
               <span className="font-[family-name:var(--font-headline)] text-3xl font-bold text-on-background tabular-nums">98.2%</span>
-              <span className="font-[family-name:var(--font-label)] text-xs uppercase tracking-widest text-outline">PR Achievement Rate</span>
+              <span className="font-[family-name:var(--font-label)] text-xs uppercase tracking-widest text-outline">Taxa de Recordes</span>
             </div>
           </div>
         </div>
@@ -237,8 +238,8 @@ export default function LoginPage() {
             <div className="absolute top-0 left-0 right-0 h-1 kinetic-gradient" />
 
             <div className="mb-10">
-              <h2 className="font-[family-name:var(--font-headline)] text-3xl font-bold text-on-surface">Login to Access</h2>
-              <p className="text-on-surface-variant text-sm mt-1">Enter your athlete credentials to proceed.</p>
+              <h2 className="font-[family-name:var(--font-headline)] text-3xl font-bold text-on-surface">Acessar Plataforma</h2>
+              <p className="text-on-surface-variant text-sm mt-1">Insira suas credenciais de atleta para continuar.</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-8">
@@ -252,7 +253,7 @@ export default function LoginPage() {
               {/* Email Field */}
               <div className="relative group input-focus-accent transition-all">
                 <label className="block font-[family-name:var(--font-label)] text-[10px] uppercase tracking-[0.2em] text-outline mb-2 group-focus-within:text-primary transition-colors">
-                  Tactical ID (Email)
+                  ID Tático (Email)
                 </label>
                 <div className="flex items-center border-b border-outline-variant/40 pb-2 transition-all group-focus-within:border-primary">
                   <span className="material-symbols-outlined text-outline group-focus-within:text-primary mr-3 text-xl">alternate_email</span>
@@ -260,7 +261,7 @@ export default function LoginPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="athlete@kinetic.engine"
+                    placeholder="atleta@kinetic.engine"
                     autoComplete="email"
                     className="bg-transparent border-none focus:ring-0 w-full p-0 text-on-surface placeholder:text-surface-bright font-[family-name:var(--font-body)] text-lg outline-none"
                   />
@@ -271,10 +272,10 @@ export default function LoginPage() {
               <div className="relative group input-focus-accent transition-all">
                 <div className="flex justify-between items-end mb-2">
                   <label className="block font-[family-name:var(--font-label)] text-[10px] uppercase tracking-[0.2em] text-outline group-focus-within:text-primary transition-colors">
-                    Access Key (Password)
+                    Chave de Acesso (Senha)
                   </label>
                   <Link href="#" className="text-[10px] uppercase tracking-wider text-outline hover:text-primary transition-colors">
-                    Forgot Key?
+                    Esqueceu a senha?
                   </Link>
                 </div>
                 <div className="flex items-center border-b border-outline-variant/40 pb-2 transition-all group-focus-within:border-primary">
@@ -291,14 +292,19 @@ export default function LoginPage() {
               </div>
 
               {/* Remember me checkbox */}
-              <div className="flex items-center space-x-3 group cursor-pointer">
-                <div className="w-5 h-5 rounded-sm border border-outline-variant/50 flex items-center justify-center group-hover:border-primary transition-colors">
-                  <div className="w-2.5 h-2.5 bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+              <label className="flex items-center space-x-3 cursor-pointer select-none">
+                <div
+                  onClick={() => setRememberMe(!rememberMe)}
+                  className={`w-5 h-5 rounded-sm border flex items-center justify-center transition-colors ${
+                    rememberMe ? 'border-primary bg-primary/10' : 'border-outline-variant/50 hover:border-primary'
+                  }`}
+                >
+                  <div className={`w-2.5 h-2.5 bg-primary transition-opacity ${rememberMe ? 'opacity-100' : 'opacity-0'}`} />
                 </div>
                 <span className="text-xs font-[family-name:var(--font-label)] text-on-surface-variant uppercase tracking-wider">
-                  Maintain Active Session
+                  Manter sessão ativa
                 </span>
-              </div>
+              </label>
 
               <button
                 type="submit"
@@ -308,16 +314,16 @@ export default function LoginPage() {
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin mx-auto" />
                 ) : (
-                  'INITIATE ENGINE'
+                  'INICIAR MOTOR'
                 )}
               </button>
             </form>
 
             <div className="mt-10 pt-8 border-t border-outline-variant/10 text-center">
               <p className="text-xs font-[family-name:var(--font-body)] text-on-surface-variant">
-                Not part of the elite tier?{' '}
+                Não faz parte da elite?{' '}
                 <Link href="/register" className="text-primary font-bold ml-1 hover:underline tracking-tighter uppercase">
-                  Apply for entry
+                  Cadastre-se
                 </Link>
               </p>
             </div>
@@ -328,10 +334,10 @@ export default function LoginPage() {
       {/* Footer Decor (Desktop only) */}
       <footer className="hidden lg:flex fixed bottom-8 left-8 right-8 justify-between items-end pointer-events-none opacity-40">
         <div className="flex flex-col gap-1">
-          <span className="font-[family-name:var(--font-label)] text-[8px] uppercase tracking-[0.5em] text-outline">System Status</span>
+          <span className="font-[family-name:var(--font-label)] text-[8px] uppercase tracking-[0.5em] text-outline">Status do Sistema</span>
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            <span className="font-[family-name:var(--font-label)] text-[10px] uppercase text-on-surface">Engine Core Nominal</span>
+            <span className="font-[family-name:var(--font-label)] text-[10px] uppercase text-on-surface">Motor Principal Nominal</span>
           </div>
         </div>
         <div className="text-right">

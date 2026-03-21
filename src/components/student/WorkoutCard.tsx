@@ -53,7 +53,7 @@ export function WorkoutCard({ id, name, exerciseCount, muscleGroups, orderIndex,
         <div className="space-y-4 mb-6 lg:mb-8">
           {/* Exercise count */}
           <div className="flex items-center justify-between">
-            <span className="text-xs text-on-surface-variant uppercase font-bold tracking-widest">Exercicios</span>
+            <span className="text-xs text-on-surface-variant uppercase font-bold tracking-widest">Exercícios</span>
             <span className="text-lg font-[family-name:var(--font-headline)] font-bold tabular-nums">
               {String(exerciseCount).padStart(2, '0')}
             </span>

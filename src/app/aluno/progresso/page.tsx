@@ -117,17 +117,17 @@ export default function ProgressoPage() {
             Progresso
           </h2>
           <p className="text-primary-fixed font-[family-name:var(--font-label)] text-sm tracking-[0.2em] uppercase mt-2 hidden lg:block">
-            Analytical Engine - Session Data v4.2
+            Motor Analítico - Dados de Sessão v4.2
           </p>
           <span className="text-primary font-[family-name:var(--font-headline)] font-bold tracking-widest text-xs uppercase lg:hidden">
-            Student Dashboard
+            Painel do Aluno
           </span>
         </div>
         <div className="hidden lg:flex gap-4">
           <div className="px-6 py-3 bg-surface-container-low border border-outline-variant/10 rounded-md flex items-center gap-3">
             <span className="material-symbols-outlined text-primary">calendar_today</span>
             <span className="font-[family-name:var(--font-headline)] font-bold">
-              {new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase()}
+              {new Date().toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }).toUpperCase()}
             </span>
           </div>
           <button className="w-12 h-12 bg-surface-container-high rounded-md flex items-center justify-center hover:bg-surface-bright transition-colors">
@@ -143,10 +143,10 @@ export default function ProgressoPage() {
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity hidden lg:block">
               <span className="material-symbols-outlined text-6xl">speed</span>
             </div>
-            <span className="text-on-surface-variant font-[family-name:var(--font-label)] text-[10px] uppercase tracking-widest lg:mb-4">Volume Load</span>
+            <span className="text-on-surface-variant font-[family-name:var(--font-label)] text-[10px] uppercase tracking-widest lg:mb-4">Sequência</span>
             <div className="mt-4 lg:mt-0 flex items-baseline gap-2">
               <span className="text-4xl font-[family-name:var(--font-headline)] font-black text-on-surface tabular-nums">{stats.currentStreak}</span>
-              <span className="text-primary text-xs font-bold uppercase">DAYS</span>
+              <span className="text-primary text-xs font-bold uppercase">DIAS</span>
             </div>
           </div>
 
@@ -154,7 +154,7 @@ export default function ProgressoPage() {
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity hidden lg:block">
               <span className="material-symbols-outlined text-6xl">timer</span>
             </div>
-            <span className="text-on-surface-variant font-[family-name:var(--font-label)] text-[10px] uppercase tracking-widest lg:mb-4">Sessions / Mo</span>
+            <span className="text-on-surface-variant font-[family-name:var(--font-label)] text-[10px] uppercase tracking-widest lg:mb-4">Sessões / Mês</span>
             <div className="mt-4 lg:mt-0 flex items-baseline gap-2">
               <span className="text-4xl font-[family-name:var(--font-headline)] font-black text-on-surface tabular-nums">{stats.sessionsThisMonth}</span>
               <span className="text-on-surface-variant text-xs font-bold uppercase">/ 20</span>
@@ -166,12 +166,12 @@ export default function ProgressoPage() {
               <span className="material-symbols-outlined text-6xl">reorder</span>
             </div>
             <span className="text-on-surface-variant font-[family-name:var(--font-label)] text-[10px] uppercase tracking-widest lg:mb-4">
-              <span className="lg:hidden">Lifetime Sessions</span>
-              <span className="hidden lg:inline">Total Sets</span>
+              <span className="lg:hidden">Sessões Totais</span>
+              <span className="hidden lg:inline">Total de Séries</span>
             </span>
             <div className="mt-4 lg:mt-0 flex items-end gap-2">
               <span className="text-4xl font-[family-name:var(--font-headline)] font-black text-on-surface tabular-nums">{stats.totalSessions}</span>
-              <span className="text-primary font-[family-name:var(--font-headline)] font-bold pb-1 hidden lg:inline">COMPLETED</span>
+              <span className="text-primary font-[family-name:var(--font-headline)] font-bold pb-1 hidden lg:inline">COMPLETAS</span>
             </div>
           </div>
 
@@ -195,8 +195,8 @@ export default function ProgressoPage() {
         <div className="lg:col-span-8 bg-surface-container-low rounded-xl p-8 space-y-8 lg:border-l-4 lg:border-primary">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h3 className="text-2xl font-[family-name:var(--font-headline)] font-black uppercase tracking-tight">Load Progression</h3>
-              <p className="text-on-surface-variant text-sm font-[family-name:var(--font-label)] hidden lg:block">Monthly Compound Growth</p>
+              <h3 className="text-2xl font-[family-name:var(--font-headline)] font-black uppercase tracking-tight">Progressão de Carga</h3>
+              <p className="text-on-surface-variant text-sm font-[family-name:var(--font-label)] hidden lg:block">Crescimento Composto Mensal</p>
             </div>
             {exerciseOptions.length > 0 && (
               <div className="relative w-full md:w-auto">
@@ -205,7 +205,7 @@ export default function ProgressoPage() {
                   onChange={e => setSelectedExercise(e.target.value)}
                   className="bg-surface-container-high border-none text-on-surface text-sm font-[family-name:var(--font-label)] rounded-md px-4 py-2 pr-10 appearance-none w-full focus:ring-1 focus:ring-primary outline-none"
                 >
-                  <option value="">Selecione um exercicio</option>
+                  <option value="">Selecione um exercício</option>
                   {exerciseOptions.map(ex => (
                     <option key={ex.id} value={ex.id}>{ex.name}</option>
                   ))}
@@ -227,7 +227,7 @@ export default function ProgressoPage() {
             <ProgressChart data={chartData} />
           ) : (
             <div className="h-64 flex items-center justify-center text-on-surface-variant text-sm">
-              {selectedExercise ? 'Sem dados para este exercicio' : 'Selecione um exercicio para ver a progressao'}
+              {selectedExercise ? 'Sem dados para este exercício' : 'Selecione um exercício para ver a progressão'}
             </div>
           )}
         </div>
@@ -235,8 +235,8 @@ export default function ProgressoPage() {
         {/* PR Grid */}
         <div className="lg:col-span-4 flex flex-col gap-4">
           <h3 className="text-sm font-[family-name:var(--font-headline)] font-bold uppercase tracking-[0.2em] text-on-surface-variant flex items-center justify-between">
-            Personal Records
-            <span className="text-primary cursor-pointer">View All</span>
+            Recordes Pessoais
+            <span className="text-primary cursor-pointer">Ver Todos</span>
           </h3>
           {/* Mobile: compact list, Desktop: 2-col grid with medal icons */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
@@ -274,7 +274,7 @@ export default function ProgressoPage() {
               ))
             ) : (
               <div className="bg-surface-container-low p-6 rounded-lg text-center col-span-full">
-                <p className="text-sm text-on-surface-variant">Nenhum PR registrado ainda</p>
+                <p className="text-sm text-on-surface-variant">Nenhum recorde registrado ainda</p>
               </div>
             )}
           </div>
@@ -284,7 +284,7 @@ export default function ProgressoPage() {
       {/* Session History */}
       <div className="space-y-4">
         <h3 className="text-xl font-[family-name:var(--font-headline)] font-extrabold uppercase tracking-tight">
-          Recent Sessions History
+          Histórico de Sessões Recentes
         </h3>
         <div className="space-y-2">
           {sessions.length > 0 ? (
@@ -323,14 +323,14 @@ export default function ProgressoPage() {
                   )}
                   <span className="material-symbols-outlined text-on-surface-variant hidden lg:block">chevron_right</span>
                   <button className="bg-transparent border border-outline-variant px-4 py-1.5 rounded-md text-[10px] font-bold uppercase hover:bg-primary hover:text-on-primary-fixed hover:border-primary transition-all lg:hidden">
-                    Details
+                    Detalhes
                   </button>
                 </div>
               </div>
             ))
           ) : (
             <div className="bg-surface-container-low p-8 rounded-lg text-center">
-              <p className="text-sm text-on-surface-variant">Nenhuma sessao registrada. Inicie seu primeiro treino!</p>
+              <p className="text-sm text-on-surface-variant">Nenhuma sessão registrada. Inicie seu primeiro treino!</p>
             </div>
           )}
         </div>
@@ -346,8 +346,8 @@ export default function ProgressoPage() {
           <span className="absolute text-sm font-black font-[family-name:var(--font-headline)]">45</span>
         </div>
         <div className="pr-4">
-          <p className="text-[10px] text-on-surface-variant font-black uppercase tracking-[0.2em]">Next Set</p>
-          <h6 className="text-white font-[family-name:var(--font-headline)] font-bold">Rest Timer</h6>
+          <p className="text-[10px] text-on-surface-variant font-black uppercase tracking-[0.2em]">Próxima Série</p>
+          <h6 className="text-white font-[family-name:var(--font-headline)] font-bold">Descanso</h6>
         </div>
         <button className="w-10 h-10 bg-primary text-on-primary rounded-full flex items-center justify-center">
           <span className="material-symbols-outlined">play_arrow</span>

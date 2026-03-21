@@ -107,7 +107,7 @@ export default function WorkoutDetailPage() {
   if (!workout) {
     return (
       <div className="p-4 pt-12 text-center">
-        <p className="text-on-surface-variant">Treino nao encontrado</p>
+        <p className="text-on-surface-variant">Treino não encontrado</p>
       </div>
     )
   }
@@ -145,7 +145,7 @@ export default function WorkoutDetailPage() {
                 </span>
               )}
               <span className="text-on-surface-variant text-xs font-medium">
-                {sortedExercises.length} exercicios
+                {sortedExercises.length} exercícios
               </span>
             </div>
           </div>

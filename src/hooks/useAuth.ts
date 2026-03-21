@@ -11,21 +11,22 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const setCookie = (token: string) => {
-    document.cookie = `tron-auth-token=${token}; path=/; max-age=${60 * 15}; samesite=lax`
+  const setCookie = (token: string, persistent?: boolean) => {
+    const maxAge = persistent ? 60 * 60 * 24 * 7 : 60 * 15 // 7 days or 15 min
+    document.cookie = `tron-auth-token=${token}; path=/; max-age=${maxAge}; samesite=lax`
   }
 
   const removeCookie = () => {
     document.cookie = 'tron-auth-token=; path=/; max-age=0'
   }
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string, rememberMe?: boolean) => {
     setIsLoading(true)
     setError(null)
     try {
       const { data } = await apiClient.post('/auth/login', { email, password })
       setAuth(data.user, data.accessToken, data.refreshToken)
-      setCookie(data.accessToken)
+      setCookie(data.accessToken, rememberMe)
 
       if (data.user.role === 'TRAINER') {
         router.push('/professor/dashboard')

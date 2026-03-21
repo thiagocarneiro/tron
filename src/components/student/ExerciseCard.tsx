@@ -30,9 +30,9 @@ export function ExerciseCard(props: ExerciseCardProps) {
 
   const renderWorkingSetLabel = () => {
     const config = props.workingSetConfig
-    if (config.type === 'cluster') return 'Cluster Set'
-    if (config.type === 'isometric') return 'Isometric'
-    return 'Working Set'
+    if (config.type === 'cluster') return 'Série Cluster'
+    if (config.type === 'isometric') return 'Isométrico'
+    return 'Série de Trabalho'
   }
 
   const renderWorkingSetReps = () => {
@@ -111,7 +111,7 @@ export function ExerciseCard(props: ExerciseCardProps) {
             {props.hasWarmup && props.warmupConfig && (
               <div className="flex items-center justify-between bg-surface-container-high/50 p-3 rounded-lg border-l-2 border-on-surface-variant/30">
                 <div>
-                  <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Warmup</span>
+                  <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Aquecimento</span>
                   <p className="font-[family-name:var(--font-headline)] text-lg font-bold">
                     {props.warmupConfig.sets} <span className="text-sm font-normal text-on-surface-variant">x</span> {props.warmupConfig.reps}
                   </p>
@@ -129,7 +129,7 @@ export function ExerciseCard(props: ExerciseCardProps) {
                     1 <span className="text-sm font-normal text-on-surface-variant">x</span> {props.feeder1Config.reps}
                   </p>
                 </div>
-                <span className="text-xs text-on-surface-variant/60 font-medium">Build to load</span>
+                <span className="text-xs text-on-surface-variant/60 font-medium">Progressão</span>
               </div>
             )}
 
@@ -142,7 +142,7 @@ export function ExerciseCard(props: ExerciseCardProps) {
                     1 <span className="text-sm font-normal text-on-surface-variant">x</span> {props.feeder2Config.reps}
                   </p>
                 </div>
-                <span className="text-xs text-on-surface-variant/60 font-medium">Build to load</span>
+                <span className="text-xs text-on-surface-variant/60 font-medium">Progressão</span>
               </div>
             )}
 
@@ -156,7 +156,7 @@ export function ExerciseCard(props: ExerciseCardProps) {
                 {props.workingSetConfig.rest && (
                   <>
                     <span className="text-xs text-primary font-bold block">RPE 9</span>
-                    <span className="text-[10px] text-on-surface-variant uppercase">{props.workingSetConfig.rest} Rest</span>
+                    <span className="text-[10px] text-on-surface-variant uppercase">{props.workingSetConfig.rest} Desc.</span>
                   </>
                 )}
               </div>
@@ -171,7 +171,7 @@ export function ExerciseCard(props: ExerciseCardProps) {
                     2 <span className="text-sm font-normal text-on-surface-variant">x</span> {props.backoffConfig.reps}
                   </p>
                 </div>
-                <span className="text-xs text-on-surface-variant/60 font-medium">-15% Load</span>
+                <span className="text-xs text-on-surface-variant/60 font-medium">-15% Carga</span>
               </div>
             )}
           </div>

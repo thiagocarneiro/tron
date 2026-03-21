@@ -302,7 +302,7 @@ export default function ActiveSessionPage() {
     return (
       <div className="min-h-screen flex items-center justify-center animate-fade-in bg-background">
         <div className="text-center">
-          <p className="text-on-surface-variant mb-4">{loadError ? 'Erro ao carregar treino' : 'Nenhum exercicio encontrado'}</p>
+          <p className="text-on-surface-variant mb-4">{loadError ? 'Erro ao carregar treino' : 'Nenhum exercício encontrado'}</p>
           <button
             onClick={() => router.replace('/aluno/treinos')}
             className="px-4 py-2 bg-surface-container-high text-on-surface rounded-md text-sm hover:bg-surface-bright transition-colors"
@@ -320,7 +320,7 @@ export default function ActiveSessionPage() {
       {!isOnline && (
         <div className="bg-error-container text-on-error-container py-2 px-4 text-center text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 sticky top-0 z-[60]">
           <span className="material-symbols-outlined text-sm">cloud_off</span>
-          Voce esta offline
+          Você está offline
         </div>
       )}
 
@@ -329,7 +329,7 @@ export default function ActiveSessionPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => {
-              if (confirm('Deseja sair do treino? O progresso salvo sera mantido.')) {
+              if (confirm('Deseja sair do treino? O progresso salvo será mantido.')) {
                 router.replace('/aluno/treinos')
               }
             }}
@@ -341,7 +341,7 @@ export default function ActiveSessionPage() {
         </div>
         <div className="flex flex-col items-end">
           <span className="text-[10px] tracking-widest text-white/50 normal-case">PROGRESSO</span>
-          <span className="text-sm font-[family-name:var(--font-headline)]">{Math.round(progress * 100)}% COMPLETE</span>
+          <span className="text-sm font-[family-name:var(--font-headline)]">{Math.round(progress * 100)}% COMPLETO</span>
         </div>
       </header>
 

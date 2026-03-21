@@ -85,7 +85,7 @@ export default function RegisterPage() {
             TRON <span className="text-primary">FITNESS</span>
           </h1>
           <p className="font-[family-name:var(--font-label)] text-xs uppercase tracking-[0.3em] text-on-surface-variant mt-2 font-medium">
-            Create your account
+            Crie sua conta
           </p>
         </div>
 
