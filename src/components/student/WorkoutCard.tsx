@@ -78,27 +78,19 @@ export function WorkoutCard({ id, name, exerciseCount, muscleGroups, orderIndex,
         </div>
 
         {/* CTA Button */}
-        {isFirst ? (
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              router.push(`/aluno/treinos/${id}`)
-            }}
-            className="w-full py-4 border border-primary/30 text-primary font-[family-name:var(--font-headline)] font-black text-sm tracking-widest hover:bg-primary hover:text-black transition-all"
-          >
-            INICIAR TREINO
-          </button>
-        ) : (
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              router.push(`/aluno/treinos/${id}`)
-            }}
-            className="w-full py-4 bg-surface-container-highest text-on-surface-variant font-[family-name:var(--font-headline)] font-black text-sm tracking-widest hover:bg-primary/20 hover:text-primary transition-all"
-          >
-            VER DETALHES
-          </button>
-        )}
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            router.push(`/aluno/treinos/${id}`)
+          }}
+          className={`w-full py-4 font-[family-name:var(--font-headline)] font-black text-sm tracking-widest transition-all ${
+            isFirst
+              ? 'border border-primary/30 text-primary hover:bg-primary hover:text-black'
+              : 'border border-outline-variant/20 text-on-surface-variant hover:border-primary/30 hover:text-primary'
+          }`}
+        >
+          INICIAR TREINO
+        </button>
       </div>
     </div>
   )
