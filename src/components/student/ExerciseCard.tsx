@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { VideoPlayer } from './VideoPlayer'
 
 interface ExerciseCardProps {
   name: string
@@ -27,6 +28,8 @@ interface ExerciseCardProps {
 
 export function ExerciseCard(props: ExerciseCardProps) {
   const [expanded, setExpanded] = useState(props.orderIndex === 0)
+  const [showVideo, setShowVideo] = useState(false)
+  const [videoMounted, setVideoMounted] = useState(false)
 
   const renderWorkingSetLabel = () => {
     const config = props.workingSetConfig
@@ -86,22 +89,56 @@ export function ExerciseCard(props: ExerciseCardProps) {
           </div>
         </div>
 
-        {props.videoUrl ? (
-          <a
-            href={props.videoUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className="w-10 h-10 bg-surface-container-highest rounded-full flex items-center justify-center text-primary-fixed hover:bg-primary-container hover:text-on-primary-container transition-all flex-shrink-0"
-          >
-            <span className="material-symbols-outlined">play_circle</span>
-          </a>
-        ) : (
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {props.videoUrl && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                if (!showVideo) {
+                  setVideoMounted(true)
+                  requestAnimationFrame(() => setShowVideo(true))
+                } else {
+                  setShowVideo(false)
+                  setTimeout(() => setVideoMounted(false), 300)
+                }
+              }}
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                showVideo
+                  ? 'bg-primary text-black'
+                  : 'bg-surface-container-highest text-primary-fixed hover:bg-primary-container hover:text-on-primary-container'
+              }`}
+            >
+              <span className="material-symbols-outlined">{showVideo ? 'close' : 'play_circle'}</span>
+            </button>
+          )}
           <span className="material-symbols-outlined text-on-surface-variant/30">
             {expanded ? 'expand_less' : 'expand_more'}
           </span>
-        )}
+        </div>
       </button>
+
+      {/* Inline video player */}
+      {props.videoUrl && videoMounted && (
+        <div
+          className="grid transition-all duration-300 ease-in-out"
+          style={{ gridTemplateRows: showVideo ? '1fr' : '0fr' }}
+        >
+          <div className="overflow-hidden">
+            <div className="px-5 pb-4 pt-1">
+              <VideoPlayer
+                url={props.videoUrl}
+                title={props.name}
+                autoOpen
+                onClose={() => {
+                  setShowVideo(false)
+                  setTimeout(() => setVideoMounted(false), 300)
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Expanded content with set hierarchy */}
       {expanded && (

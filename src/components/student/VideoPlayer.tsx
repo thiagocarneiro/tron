@@ -7,6 +7,8 @@ interface VideoPlayerProps {
   url: string
   title?: string
   className?: string
+  autoOpen?: boolean
+  onClose?: () => void
 }
 
 function getYouTubeId(url: string): string | null {
@@ -21,10 +23,15 @@ function getYouTubeId(url: string): string | null {
   return null
 }
 
-export function VideoPlayer({ url, title, className }: VideoPlayerProps) {
-  const [isOpen, setIsOpen] = useState(false)
+export function VideoPlayer({ url, title, className, autoOpen, onClose }: VideoPlayerProps) {
+  const [isOpen, setIsOpen] = useState(autoOpen ?? false)
   const youtubeId = getYouTubeId(url)
   const isYouTube = !!youtubeId
+
+  const handleClose = () => {
+    setIsOpen(false)
+    onClose?.()
+  }
 
   if (!isOpen) {
     return (
@@ -35,7 +42,7 @@ export function VideoPlayer({ url, title, className }: VideoPlayerProps) {
         <div className="w-8 h-8 rounded-full gradient-cta flex items-center justify-center">
           <Play size={14} className="text-white ml-0.5" />
         </div>
-        <span className="font-semibold uppercase tracking-wider text-xs">Ver Execução</span>
+        <span className="font-semibold uppercase tracking-wider text-xs">Ver Execucao</span>
       </button>
     )
   }
@@ -44,7 +51,7 @@ export function VideoPlayer({ url, title, className }: VideoPlayerProps) {
     <div className="relative bg-[#131313] rounded-md overflow-hidden">
       {/* Close button */}
       <button
-        onClick={() => setIsOpen(false)}
+        onClick={handleClose}
         className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center text-white/60 hover:text-white transition-colors"
       >
         <X size={16} />

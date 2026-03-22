@@ -194,6 +194,7 @@ async function main() {
       name: 'Upper Body 1',
       icon: '💪',
       orderIndex: 0,
+      category: 'UPPER',
     },
   })
 
@@ -232,6 +233,7 @@ async function main() {
       name: 'Lower Body 1',
       icon: '🦵',
       orderIndex: 1,
+      category: 'LOWER',
     },
   })
 
@@ -269,6 +271,7 @@ async function main() {
       name: 'Upper Body 2',
       icon: '🏋️',
       orderIndex: 2,
+      category: 'UPPER',
     },
   })
 
@@ -307,6 +310,7 @@ async function main() {
       name: 'Lower Body 2',
       icon: '🔥',
       orderIndex: 3,
+      category: 'LOWER',
     },
   })
 

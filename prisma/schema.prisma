@@ -129,10 +129,12 @@ model Workout {
   name        String
   icon        String
   orderIndex  Int
+  category    String?
 
   exercises       WorkoutExercise[]
   rotationSlots   RotationSlot[]
   sessions        WorkoutSession[]
+  scheduleSlots   StudentScheduleSlot[]
 }
 
 model WeeklyRotation {
@@ -261,7 +263,33 @@ model ProgramAssignment {
 
   customNotes String?
 
+  schedule    StudentSchedule?
+
   @@unique([studentId, programId])
+}
+
+// ──────────────── Calendário do Aluno ────────────────
+
+model StudentSchedule {
+  id            String   @id @default(uuid())
+  assignmentId  String   @unique
+  assignment    ProgramAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  slots  StudentScheduleSlot[]
+}
+
+model StudentScheduleSlot {
+  id           String @id @default(uuid())
+  scheduleId   String
+  schedule     StudentSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  dayOfWeek    Int
+  workoutId    String?
+  workout      Workout? @relation(fields: [workoutId], references: [id])
+  isRest       Boolean @default(false)
+
+  @@unique([scheduleId, dayOfWeek])
 }
 
 // ──────────────── Métricas Corporais ────────────────

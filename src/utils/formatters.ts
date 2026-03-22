@@ -67,6 +67,17 @@ export function parseRestTime(rest: string): number {
   return unit === 'min' ? value * 60 : value
 }
 
+export function getCurrentDayOfWeek(): number {
+  // Convert JS Date (0=Sunday) to our convention (0=Monday)
+  const jsDay = new Date().getDay()
+  return jsDay === 0 ? 6 : jsDay - 1
+}
+
+export function getFullDayName(dayIndex: number): string {
+  const days = ['Segunda-feira', 'Terca-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sabado', 'Domingo']
+  return days[dayIndex] || ''
+}
+
 export function cn(...classes: (string | undefined | null | false)[]): string {
   return classes.filter(Boolean).join(' ')
 }

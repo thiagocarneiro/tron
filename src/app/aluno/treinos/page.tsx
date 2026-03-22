@@ -1,12 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import api from '@/api/client'
 import { WorkoutCard } from '@/components/student/WorkoutCard'
 import { WorkoutCardSkeleton } from '@/components/ui/Skeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { WeeklyCalendarStrip } from '@/components/student/WeeklyCalendarStrip'
 import { Dumbbell } from 'lucide-react'
-import { getCurrentWeek } from '@/utils/formatters'
+import { getCurrentWeek, getCurrentDayOfWeek } from '@/utils/formatters'
 
 interface ProgramData {
   id: string
@@ -14,12 +16,24 @@ interface ProgramData {
   description: string | null
   durationWeeks: number
   phases: { id: string; weekStart: number; weekEnd: number; name: string; description: string; color: string; orderIndex: number }[]
-  workouts: { id: string; name: string; icon: string; orderIndex: number; exerciseCount: number; muscleGroups: string[] }[]
+  workouts: { id: string; name: string; icon: string; orderIndex: number; category: string | null; exerciseCount: number; muscleGroups: string[] }[]
   startDate: string
 }
 
+interface ScheduleSlot {
+  dayOfWeek: number
+  workoutId: string | null
+  workoutName: string | null
+  workoutIcon: string | null
+  workoutCategory: string | null
+  workoutOrderIndex: number | null
+  isRest: boolean
+}
+
 export default function TreinosPage() {
+  const router = useRouter()
   const [program, setProgram] = useState<ProgramData | null>(null)
+  const [schedule, setSchedule] = useState<{ id: string; slots: ScheduleSlot[] } | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -28,11 +42,12 @@ export default function TreinosPage() {
     setError('')
     api.get('/student/program')
       .then(res => {
-        const { assignment, program } = res.data
+        const { assignment, program, schedule: scheduleData } = res.data
         setProgram({
           ...program,
           startDate: assignment.startDate,
         })
+        setSchedule(scheduleData || null)
       })
       .catch(err => setError(err.response?.data?.error || 'Erro ao carregar programa'))
       .finally(() => setLoading(false))
@@ -100,6 +115,13 @@ export default function TreinosPage() {
   const currentPhase = program.phases[currentPhaseIndex >= 0 ? currentPhaseIndex : 0]
   const sortedWorkouts = [...program.workouts].sort((a, b) => a.orderIndex - b.orderIndex)
   const totalSessions = program.durationWeeks * sortedWorkouts.length
+
+  // Schedule-based today's workout
+  const todayDow = getCurrentDayOfWeek()
+  const todaySlot = schedule?.slots.find(s => s.dayOfWeek === todayDow)
+  const todayWorkoutId = todaySlot?.workoutId || null
+  const isRestDay = todaySlot?.isRest || false
+  const hasSchedule = !!schedule
 
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto min-h-screen page-transition">
@@ -261,10 +283,74 @@ export default function TreinosPage() {
         </div>
       </section>
 
+      {/* ===================== WEEKLY CALENDAR ===================== */}
+      {hasSchedule && schedule && (
+        <section className="mb-8">
+          <div className="bg-surface-container-low rounded-xl p-4 border border-outline-variant/5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
+                Calendario Semanal
+              </p>
+            </div>
+            <WeeklyCalendarStrip
+              slots={schedule.slots}
+              showEditButton
+              onEditTap={() => router.push('/aluno/treinos/calendario')}
+            />
+          </div>
+        </section>
+      )}
+
+      {/* Schedule CTA (when no schedule configured) */}
+      {!hasSchedule && (
+        <section className="mb-8">
+          <button
+            onClick={() => router.push('/aluno/treinos/calendario')}
+            className="w-full bg-surface-container-low border border-primary/20 rounded-xl p-6 text-left hover:bg-surface-container-high transition-all active:scale-[0.99] group"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <span className="material-symbols-outlined text-primary text-2xl">calendar_month</span>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-bold text-on-surface group-hover:text-primary transition-colors">
+                  Configure seu Calendario Semanal
+                </p>
+                <p className="text-xs text-on-surface-variant mt-0.5">
+                  Defina quais treinos fazer em cada dia da semana
+                </p>
+              </div>
+              <span className="material-symbols-outlined text-on-surface-variant/40 group-hover:text-primary transition-colors">
+                arrow_forward
+              </span>
+            </div>
+          </button>
+        </section>
+      )}
+
+      {/* Rest day notice */}
+      {hasSchedule && isRestDay && (
+        <section className="mb-8">
+          <div className="bg-surface-container-low border border-outline-variant/10 rounded-xl p-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center">
+                <span className="material-symbols-outlined text-on-surface-variant text-2xl">bedtime</span>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-on-surface">Hoje e dia de descanso</p>
+                <p className="text-xs text-on-surface-variant mt-0.5">
+                  Mas voce pode acessar qualquer treino abaixo se preferir
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ===================== DESKTOP: Section Header ===================== */}
       <div className="hidden lg:flex items-center justify-between mb-8">
         <h2 className="text-3xl font-[family-name:var(--font-headline)] font-black uppercase tracking-tighter">
-          Sessões Disponíveis
+          {hasSchedule && todayWorkoutId ? 'Treino de Hoje' : 'Sessoes Disponiveis'}
         </h2>
         <div className="flex gap-2">
           <button className="p-2 border border-outline-variant/20 rounded-md text-on-surface-variant hover:text-white hover:bg-surface-container-high transition-all">
@@ -278,24 +364,37 @@ export default function TreinosPage() {
 
       {/* ===================== WORKOUT CARDS ===================== */}
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {sortedWorkouts.map((workout, i) => (
-          <div
-            key={workout.id}
-            className="animate-stagger-in"
-            style={{ '--i': i } as React.CSSProperties}
-          >
-            <WorkoutCard
-              id={workout.id}
-              name={workout.name}
-              icon={workout.icon}
-              exerciseCount={workout.exerciseCount}
-              muscleGroups={workout.muscleGroups}
-              phaseColor={currentPhase?.color}
-              orderIndex={workout.orderIndex}
-              isFirst={i === 0}
-            />
-          </div>
-        ))}
+        {(() => {
+          // Reorder: today's workout first if schedule exists
+          const orderedWorkouts = hasSchedule && todayWorkoutId
+            ? [
+                ...sortedWorkouts.filter(w => w.id === todayWorkoutId),
+                ...sortedWorkouts.filter(w => w.id !== todayWorkoutId),
+              ]
+            : sortedWorkouts
+
+          return orderedWorkouts.map((workout, i) => {
+            const isToday = hasSchedule ? workout.id === todayWorkoutId : i === 0
+            return (
+              <div
+                key={workout.id}
+                className="animate-stagger-in"
+                style={{ '--i': i } as React.CSSProperties}
+              >
+                <WorkoutCard
+                  id={workout.id}
+                  name={workout.name}
+                  icon={workout.icon}
+                  exerciseCount={workout.exerciseCount}
+                  muscleGroups={workout.muscleGroups}
+                  phaseColor={currentPhase?.color}
+                  orderIndex={workout.orderIndex}
+                  isFirst={isToday}
+                />
+              </div>
+            )
+          })
+        })()}
 
         {/* Rest & Recovery card */}
         <div className="group relative overflow-hidden bg-surface-container-low border border-outline-variant/10 rounded-xl opacity-60">

@@ -48,6 +48,16 @@ export async function GET(request: NextRequest) {
           },
         },
       },
+      schedule: {
+        include: {
+          slots: {
+            orderBy: { dayOfWeek: 'asc' },
+            include: {
+              workout: { select: { id: true, name: true, icon: true, category: true, orderIndex: true } },
+            },
+          },
+        },
+      },
     },
   })
 
@@ -67,10 +77,24 @@ export async function GET(request: NextRequest) {
       name: workout.name,
       icon: workout.icon,
       orderIndex: workout.orderIndex,
+      category: workout.category,
       exerciseCount: workout.exercises.length,
       muscleGroups: uniqueMuscleGroups,
     }
   })
+
+  const schedule = assignment.schedule ? {
+    id: assignment.schedule.id,
+    slots: assignment.schedule.slots.map(s => ({
+      dayOfWeek: s.dayOfWeek,
+      workoutId: s.workoutId,
+      workoutName: s.workout?.name || null,
+      workoutIcon: s.workout?.icon || null,
+      workoutCategory: s.workout?.category || null,
+      workoutOrderIndex: s.workout?.orderIndex ?? null,
+      isRest: s.isRest,
+    })),
+  } : null
 
   return jsonResponse({
     assignment: {
@@ -89,5 +113,6 @@ export async function GET(request: NextRequest) {
       tips: assignment.program.tips,
       rotations: assignment.program.rotations,
     },
+    schedule,
   })
 }
